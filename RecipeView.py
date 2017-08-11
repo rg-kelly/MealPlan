@@ -30,7 +30,7 @@ def configureGui(app, handleOptionBox, press):
     app.startTab("Assign Recipes")
     app.addLabel("assignRecipesTitle", "Assign Recipes", row = headingRow, column = 0, colspan = 4)
     
-    app.addLabelEntry(dateEntryLabel, row = dateRow, column = 0)
+    app.addLabelEntry(dateEntryLabel, row = dateRow, column = 0) # TODO Change this to editable drop down
     app.setEntryDefault(dateEntryLabel, "yyyy-mm-dd")
     app.addButton("Go", press, row = dateRow, column = 1)
     

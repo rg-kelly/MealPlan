@@ -1,7 +1,7 @@
 from appJar import gui
 from RecipeModel import *
 from RecipeView import *
-from DayModel import Day
+from DayAssignment import DayAssignment
 from Utilities import *
 import Calendar
 from datetime import datetime
@@ -22,7 +22,7 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
     isSide = (labelName.__contains__("side"))
 
     if nameColumn == "Recipe_Name":
-        optionsList = Day.updateRecipeList(labelName, optionsList, isSide)        
+        optionsList = DayAssignment.updateRecipeList(getDateEntry(), labelName, optionsList, isSide)        
     
     if isUpdate:
         app.changeOptionBox(labelName, optionsList)
@@ -31,6 +31,10 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
             app.addOptionBox(labelName, optionsList, row, column)
         else:
             app.addLabelOptionBox(labelName, optionsList, row, column)
+
+def getDateEntry():
+    #TODO: Make sure user enters a valid date before proceeding
+    return app.getEntry(dateEntryLabel)
 
 def press(btn):
     if btn == "Cancel":
@@ -43,7 +47,7 @@ def press(btn):
         pressDateGo()
         
 def pressDateGo():
-    dateEntry = app.getEntry(dateEntryLabel)
+    dateEntry = getDateEntry()
     dateExists = (Utilities.getKnownInfo(dateEntry, WeekOfDate.dateIdColumn, WeekOfDate.dateNameColumn, WeekOfDate.dateTable, False) != None)
     actionType = "update"
     
@@ -60,10 +64,10 @@ def pressDateGo():
         wkOfDate.add()
         
         for day in daysOfWeek:
-            dayObj = Day.createNewDay(day, dateEntry)
+            dayObj = DayAssignment.createNewDay(day, dateEntry)
             dayObj.add()
     
-    #configureRecipeDropDowns(mainTableParameter=Day.generateJoin(dateEntry, Recipe.mainTypeId, Day.mainIdColumn), sideATableParameter=Day.generateJoin(dateEntry, Recipe.sideTypeId, Day.sideAIdColumn), sideBTableParameter=Day.generateJoin(dateEntry, Recipe.sideTypeId, Day.sideBIdColumn), actionType=actionType)
+    #configureRecipeDropDowns(mainTableParameter=DayAssignment.generateJoin(dateEntry, Recipe.mainTypeId, DayAssignment.mainIdColumn), sideATableParameter=DayAssignment.generateJoin(dateEntry, Recipe.sideTypeId, DayAssignment.sideAIdColumn), sideBTableParameter=DayAssignment.generateJoin(dateEntry, Recipe.sideTypeId, DayAssignment.sideBIdColumn), actionType=actionType)
     configureRecipeDropDowns(actionType=actionType)
 
 def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideATableParameter = Recipe.whereSideTypeId, sideBTableParameter = Recipe.whereSideTypeId, actionType = "update"):    
@@ -109,11 +113,11 @@ def pressRecipeAssign():
         checkEntriesForCalendar(day, mainDishInput, sideAInput, sideBInput)
 
 def updateAssignment(day, mainDishInput, sideAInput, sideBInput):
-    dayObject = Day.getExistingDay(day)
+    dayObject = DayAssignment.getExistingDay(getDateEntry(), day)
     dayObject.updateRecipeAssignment(mainDishInput, sideAInput, sideBInput)
     
 def checkEntriesForCalendar(day, mainDishInput, sideAInput, sideBInput):
-    dateUserEntry = app.getEntry(dateEntryLabel)
+    dateUserEntry = getDateEntry()
     summary = "{}, {}, {}".format(mainDishInput, sideAInput, sideBInput)     
     nonePhrases = ["None, ", ", None", "None"]
     
