@@ -18,9 +18,6 @@ submitRow = typeHeadingRow + 10
 def configureGui(app, handleOptionBox, press):
     recipeNameMaxLength = 50
 
-    #app.startTabbedFrame("recipeTabbedFrame")
-    #app.startTab("Recipes")
-
     app.startTabbedFrame("recipeSubtabbedFrame")
     app.startTab("Add Recipes")
     addItem(recipeNameMaxLength, "Recipe", app, press)
@@ -33,18 +30,5 @@ def configureGui(app, handleOptionBox, press):
     app.addLabelEntry(dateEntryLabel, row = dateRow, column = 0) # TODO Change this to editable drop down
     app.setEntryDefault(dateEntryLabel, "yyyy-mm-dd")
     app.addButton("Go", press, row = dateRow, column = 1)
-    
-    rowCount = typeHeadingRow + 1
-    #for day in daysOfWeek:
-        #handleOptionBox(day, "add", Recipe.recipeNameColumn, Recipe.whereMainTypeId, row = rowCount, column = 0)
-        #handleOptionBox(Recipe.sideALabelPrefix + day, "add", Recipe.recipeNameColumn, Recipe.whereSideTypeId, row = rowCount, column = 1)
-        #handleOptionBox(Recipe.sideBLabelPrefix + day, "add", Recipe.recipeNameColumn, Recipe.whereSideTypeId, row = rowCount, column = 2)
-        #rowCount += 1
-    
-    #app.stopTab()
-    #app.stopTabbedFrame()
-
-    #app.stopTab()
-    #app.stopTabbedFrame()
     
     app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", "Assign Recipes")
