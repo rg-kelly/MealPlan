@@ -23,7 +23,7 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
 
     if nameColumn == "Recipe_Name":
         optionsList = DayAssignment.updateRecipeList(getDateEntry(), labelName, optionsList, isSide)        
-    
+
     if isUpdate:
         app.changeOptionBox(labelName, optionsList)
     elif isAdd:        
@@ -101,7 +101,6 @@ def pressRecipeAdd():
         print("Recipe '{}' already exists. Please enter a unique recipe name.".format(recipeName))
     
     app.clearEntry(newRecipeLabel, callFunction=False)
-    app.setOptionBox(recipeTypeLabel, 0, value=True, callFunction=False)    
 
 def pressRecipeAssign():
     for day in daysOfWeek:
@@ -138,7 +137,7 @@ def checkEntriesForCalendar(day, mainDishInput, sideAInput, sideBInput):
 def addToCalendar(day, dateEntry, summary):
     dateDict = {}        
     dateDict[day] = datetime.strftime(dateEntry + timedelta(days=daysOfWeek.index(day)), dateFormat) 
-    Calendar.main(summary, dateDict[day])
+    #Calendar.main(summary, dateDict[day])
 
 configureGui(app, handleOptionBox, press)
 app.go()

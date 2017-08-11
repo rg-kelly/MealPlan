@@ -94,7 +94,7 @@ class DayAssignment:
                 connection.updateData(insertQuery, insertBindingVariables)
             
             self.mainDish, self.sideA, self.sideB = mainDishInput, sideAInput, sideBInput
-            updateQuery = "UPDATE {} SET {} = %s WHERE {} = {}".format(DayAssignment.dayAssignmentTable, DayAssignment.mealIdColumn, DayAssignment.dayIdColumn, str(self.dayId))
+            updateQuery = "UPDATE {} SET {} = %s WHERE {} = {} AND {} = {}".format(DayAssignment.dayAssignmentTable, DayAssignment.mealIdColumn, DayAssignment.dayIdColumn, str(self.dayId), WeekOfDate.dateIdColumn, str(self.dateId))
             updateBindingVariable = (inputsMealId,)
             connection.updateData(updateQuery, updateBindingVariable)
             
