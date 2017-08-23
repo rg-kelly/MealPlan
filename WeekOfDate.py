@@ -22,17 +22,29 @@ class WeekOfDate:
         print("Successfully added " + "'" + self.weekOfDate + "'")
         print(self)
         
-    def findClosestWeekOfDate():
+    def findClosestWeekOfDate(listOptions = False):
         connection = DataConnection()
-    
-        query = "SELECT MIN({0}) FROM {1} WHERE {0} >= CURDATE();".format(WeekOfDate.dateNameColumn, WeekOfDate.dateTable)
+        listOfDates = []
+        
+        if not listOptions:
+            query = "SELECT MIN({0}) FROM {1} WHERE ABS(DATEDIFF({0}, NOW())) <= 6;".format(WeekOfDate.dateNameColumn, WeekOfDate.dateTable)
+        else:
+            query = "SELECT {0} FROM {1} WHERE DATEDIFF({0}, NOW()) >= -6;".format(WeekOfDate.dateNameColumn, WeekOfDate.dateTable)
     
         result = connection.runQuery(query)
-        closestDateResult = result.fetchone()
+        dateResult = result.fetchall()
         connection.closeConnection()
     
-        if closestDateResult != None: return closestDateResult[0]
-        else: return None              
+        if dateResult != None:
+            for item in dateResult:
+                if not listOptions:
+                    return item[0]
+                else:
+                    listOfDates.append(datetime.strftime(item[0], "%Y-%m-%d"))
+        else:
+            return None
+        
+        if listOptions: return listOfDates
         
     def __str__(self):
         message = "Week of date: " + self.weekOfDate

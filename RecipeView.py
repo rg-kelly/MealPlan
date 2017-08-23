@@ -4,6 +4,8 @@ from WeekOfDate import *
 from DayAssignment import DayAssignment
 from AddView import addItem
 from Utilities import listOptions
+from Settings import Settings
+from ast import literal_eval
 
 daysOfWeek = listOptions(DayAssignment.dayNameColumn, DayAssignment.dayTable, True, "ORDER BY {} ASC".format(DayAssignment.dayIdColumn))
 newRecipeLabel = "Recipe Name"
@@ -24,21 +26,34 @@ goButtonColumn = newDateEntryColumn + 1
 
 startLabelDinner = "Start: "
 endLabelDinner = "End: "
-startTimeDefault = 5
-endTimeDefault = startTimeDefault + 1
+updateCheckBoxLabel = "Update"
+
+### Settings values from DB ###
+dinnerKey = 'dinner'
+startKey = 'start'
+endKey = 'end'
+dinnerTimeSetting = Settings.getExistingSetting(dinnerKey)
+startTime = dinnerTimeSetting.settingDictionary[dinnerKey][startKey]
+endTime = dinnerTimeSetting.settingDictionary[dinnerKey][endKey]
+
+updateKey = 'update_calendar'
+updateCalendarSetting = Settings.getExistingSetting(updateKey)
+updateCalendar = literal_eval(updateCalendarSetting.settingDictionary[updateKey])
+###############################
 
 def configureGui(app, handleOptionBox, press):
     recipeNameMaxLength = 50
 
     app.startTabbedFrame("recipeSubtabbedFrame")
     app.startTab("Calendar Settings")
-    app.addCheckBox("Update")
-    app.setCheckBox("Update", ticked=True, callFunction=False) # TODO Store in db
+    app.addCheckBox(updateCheckBoxLabel)
+    app.setCheckBox(updateCheckBoxLabel, ticked=updateCalendar, callFunction=False) # TODO Store in db
     app.addLabel("dinnerSettingsLabel","Dinner Settings")
     app.addLabelEntry(startLabelDinner)
-    app.setEntry(startLabelDinner, "{}:00".format(startTimeDefault)) # TODO Store in db
+    app.setEntry(startLabelDinner, "{}".format(startTime)) # TODO Store in db
     app.addLabelEntry(endLabelDinner)
-    app.setEntry(endLabelDinner, "{}:00".format(endTimeDefault)) # TODO Store in db
+    app.setEntry(endLabelDinner, "{}".format(endTime)) # TODO Store in db
+    app.addButton("Update", press)
     app.stopTab()
     
     app.startTab("Add Recipes")
@@ -49,7 +64,7 @@ def configureGui(app, handleOptionBox, press):
     app.startTab("Assign Recipes")
     app.addLabel("assignRecipesTitle", "Assign Recipes", row = headingRow, column = 0, colspan = 4)
 
-    handleOptionBox(dateEntryLabel, "add", WeekOfDate.dateNameColumn, "{} WHERE {} >= curdate() - interval 7 day".format(WeekOfDate.dateTable, WeekOfDate.dateNameColumn), dateRow, dateSelectionColumn)
+    handleOptionBox(dateEntryLabel, "add", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, dateRow, dateSelectionColumn)
     app.addLabelEntry(newDateEntryLabel, row = dateRow, column = newDateEntryColumn)
     app.setEntryDefault(newDateEntryLabel, "yyyy-mm-dd")
     app.addButton("Go", press, row = dateRow, column = goButtonColumn)

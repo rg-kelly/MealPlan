@@ -7,24 +7,28 @@ import Calendar
 from datetime import datetime
 from datetime import timedelta
 from WeekOfDate import WeekOfDate
+from Settings import Settings
 
 app = gui("Meal Plan Configuration")
-dateFormat = "%Y-%m-%d" 
+dateFormat = "%Y-%m-%d"
+newOption = "- Select or Add New -"
 
 def addRecipe(recipeName, recipeType):
     recipe = Recipe.createNewRecipe(recipeName, recipeType)
     recipe.add()
 
 def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultRow, column = defaultColumn):
-    optionsList = listOptions(nameColumn, tableName, True)
     isAdd = (actionType == "add")
     isUpdate = (actionType == "update")
     isSide = (labelName.__contains__("side"))
 
+    if nameColumn != WeekOfDate.dateNameColumn:
+        optionsList = listOptions(nameColumn, tableName, True)
     if nameColumn == Recipe.recipeNameColumn:
         optionsList = DayAssignment.updateRecipeList(getDateEntry(), labelName, optionsList, isSide)        
-    if nameColumn == WeekOfDate.dateNameColumn:
-        optionsList.insert(0, "New")
+    elif nameColumn == WeekOfDate.dateNameColumn:
+        optionsList = WeekOfDate.findClosestWeekOfDate(listOptions=True)
+        optionsList.insert(0, newOption)
 
     if isUpdate:
         app.changeOptionBox(labelName, optionsList)
@@ -40,27 +44,28 @@ def validateDateEntry(dateInput):
         return True
     except ValueError:
         return False
-    finally:
-        return False
 
-def getDateEntry(notifyIfNew = False):
+def getDateEntry(notifyIfManual = False):
     selection = app.getOptionBox(dateEntryLabel)
     entry = app.getEntry(newDateEntryLabel)
+    isManual = False
     
-    if selection == "New":
-        if entry == "":
-            entry = datetime.strftime(WeekOfDate.findClosestWeekOfDate(), dateFormat)
-            app.setOptionBox(dateEntryLabel, entry)
+    if entry:
+        isManual = True
+        dateEntry = entry
+    elif selection == None:
+        entry = datetime.strftime(WeekOfDate.findClosestWeekOfDate(listOptions=False), dateFormat)
+        app.setOptionBox(dateEntryLabel, entry)
         dateEntry = entry
     else:
         dateEntry = selection
     
     dateIsValid = validateDateEntry(dateEntry)
     if dateIsValid:
-        if not notifyIfNew:
-            return dateEntry
+        if notifyIfManual:
+            return dateEntry, isManual
         else:
-            return dateEntry, True
+            return dateEntry
     else:
         errorMessage = "Date entered ({}) is incorrect. Ensure it is formatted like YYYY-MM-DD and is a legitimate calendar date.".format(dateEntry)
         app.errorBox("ERROR", errorMessage)
@@ -76,9 +81,14 @@ def press(btn):
         pressRecipeAssign()
     elif btn == "Go":
         pressDateGo()
+    elif btn == "Update":
+        pressSettingsUpdate()
+        
+def pressSettingsUpdate(): #TODO!
+    return True
         
 def pressDateGo():
-    dateEntry = getDateEntry()
+    dateEntry, isManualDateEntry = getDateEntry(notifyIfManual=True)
     isNewDate = (Utilities.getKnownInfo(dateEntry, WeekOfDate.dateIdColumn, WeekOfDate.dateNameColumn, WeekOfDate.dateTable, False) == None)
     actionType = getActionType()
     
@@ -95,6 +105,7 @@ def pressDateGo():
             dayObj = DayAssignment.createNewDay(day, dateEntry)
             dayObj.add()
 
+    if isManualDateEntry:
         app.clearEntry(newDateEntryLabel)
         updateDateList(dateEntry)
     
@@ -133,10 +144,14 @@ def pressRecipeAdd():
     recipeName = app.getEntry(newRecipeLabel)
     recipeType = app.getOptionBox(recipeTypeLabel)
     isNewRecipe = (getKnownInfo(recipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)
+    actionType=getActionType()
     
     if recipeName != "" and isNewRecipe:        
         addRecipe(recipeName, recipeType)
-        configureRecipeDropDowns(actionType=getActionType())
+        
+        if actionType == "update":
+            configureRecipeDropDowns()
+        
         app.infoBox(recipeName, "Successfully added new recipe!")
             
     elif not isNewRecipe:
@@ -195,7 +210,3 @@ app.go()
 # TODO:
 # * Checkbox for no meals - would set all meal choices to None automatically
 # * Store settings in db
-# * Pop ups:
-    # - alert that if trying to add new date, need to have drop down set to new
-    # - alert when duplicate date is entered
-# * double check all logic for which week of dates are shown in list as well as which is selected as default when adding a recipe
