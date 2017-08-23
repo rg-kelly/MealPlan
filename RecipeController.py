@@ -21,8 +21,10 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
     isUpdate = (actionType == "update")
     isSide = (labelName.__contains__("side"))
 
-    if nameColumn == "Recipe_Name":
+    if nameColumn == Recipe.recipeNameColumn:
         optionsList = DayAssignment.updateRecipeList(getDateEntry(), labelName, optionsList, isSide)        
+    if nameColumn == WeekOfDate.dateNameColumn:
+        optionsList.insert(0, "New")
 
     if isUpdate:
         app.changeOptionBox(labelName, optionsList)
@@ -32,9 +34,38 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
         else:
             app.addLabelOptionBox(labelName, optionsList, row, column)
 
-def getDateEntry():
-    #TODO: Make sure user enters a valid date before proceeding
-    return app.getEntry(dateEntryLabel)
+def validateDateEntry(dateInput):
+    try:
+        datetime.strptime(dateInput, dateFormat)
+        return True
+    except ValueError:
+        return False
+    finally:
+        return False
+
+def getDateEntry(notifyIfNew = False):
+    selection = app.getOptionBox(dateEntryLabel)
+    entry = app.getEntry(newDateEntryLabel)
+    
+    if selection == "New":
+        if entry == "":
+            entry = datetime.strftime(WeekOfDate.findClosestWeekOfDate(), dateFormat)
+            app.setOptionBox(dateEntryLabel, entry)
+        dateEntry = entry
+    else:
+        dateEntry = selection
+    
+    dateIsValid = validateDateEntry(dateEntry)
+    if dateIsValid:
+        if not notifyIfNew:
+            return dateEntry
+        else:
+            return dateEntry, True
+    else:
+        errorMessage = "Date entered ({}) is incorrect. Ensure it is formatted like YYYY-MM-DD and is a legitimate calendar date.".format(dateEntry)
+        app.errorBox("ERROR", errorMessage)
+        app.clearEntry(newDateEntryLabel)
+        raise Exception(errorMessage)
 
 def press(btn):
     if btn == "Cancel":
@@ -48,27 +79,39 @@ def press(btn):
         
 def pressDateGo():
     dateEntry = getDateEntry()
-    dateExists = (Utilities.getKnownInfo(dateEntry, WeekOfDate.dateIdColumn, WeekOfDate.dateNameColumn, WeekOfDate.dateTable, False) != None)
-    actionType = "update"
+    isNewDate = (Utilities.getKnownInfo(dateEntry, WeekOfDate.dateIdColumn, WeekOfDate.dateNameColumn, WeekOfDate.dateTable, False) == None)
+    actionType = getActionType()
     
-    try:
-        app.getOptionBox("Monday")
-    except:
-        actionType = "add"    
+    if actionType == "add":   
         app.addLabel("mainTitle", "Main", row = typeHeadingRow, column = 0)
         app.addLabel("side1Title", "Side 1", row = typeHeadingRow, column = 1)
         app.addLabel("side2Title", "Side 2", row = typeHeadingRow, column = 2)
         
-    if not dateExists:
+    if isNewDate:
         wkOfDate = WeekOfDate(dateEntry)
         wkOfDate.add()
         
         for day in daysOfWeek:
             dayObj = DayAssignment.createNewDay(day, dateEntry)
             dayObj.add()
+
+        app.clearEntry(newDateEntryLabel)
+        updateDateList(dateEntry)
     
-    #configureRecipeDropDowns(mainTableParameter=DayAssignment.generateJoin(dateEntry, Recipe.mainTypeId, DayAssignment.mainIdColumn), sideATableParameter=DayAssignment.generateJoin(dateEntry, Recipe.sideTypeId, DayAssignment.sideAIdColumn), sideBTableParameter=DayAssignment.generateJoin(dateEntry, Recipe.sideTypeId, DayAssignment.sideBIdColumn), actionType=actionType)
     configureRecipeDropDowns(actionType=actionType)
+
+def updateDateList(newEntry):
+    handleOptionBox(dateEntryLabel, "update", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, row = dateRow, column = dateSelectionColumn)
+    app.setOptionBox(dateEntryLabel, newEntry)
+
+def getActionType():
+    try:
+        app.getOptionBox("Monday")
+        actionType = "update"
+    except:
+        actionType = "add"
+        
+    return actionType
 
 def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideATableParameter = Recipe.whereSideTypeId, sideBTableParameter = Recipe.whereSideTypeId, actionType = "update"):    
     row = typeHeadingRow + 1
@@ -90,33 +133,44 @@ def pressRecipeAdd():
     recipeName = app.getEntry(newRecipeLabel)
     recipeType = app.getOptionBox(recipeTypeLabel)
     isNewRecipe = (getKnownInfo(recipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)
-    print(isNewRecipe)
     
     if recipeName != "" and isNewRecipe:        
         addRecipe(recipeName, recipeType)
-        configureRecipeDropDowns()
+        configureRecipeDropDowns(actionType=getActionType())
+        app.infoBox(recipeName, "Successfully added new recipe!")
             
     elif not isNewRecipe:
-        #TODO give error message pop up
-        print("Recipe '{}' already exists. Please enter a unique recipe name.".format(recipeName))
+        errorMessage = "Recipe '{}' already exists. Please enter a unique recipe name.".format(recipeName)
+        print(errorMessage)
+        app.errorBox("Error: Duplicate Recipe", errorMessage)
     
     app.clearEntry(newRecipeLabel, callFunction=False)
 
 def pressRecipeAssign():
-    for day in daysOfWeek:
-        mainDishInput = app.getOptionBox(day)
-        sideAInput = app.getOptionBox(Recipe.sideALabelPrefix + day)
-        sideBInput = app.getOptionBox(Recipe.sideBLabelPrefix + day)
-    
-        updateAssignment(day, mainDishInput, sideAInput, sideBInput)
-        checkEntriesForCalendar(day, mainDishInput, sideAInput, sideBInput)
+    try:
+        for day in daysOfWeek:
+            mainDishInput = app.getOptionBox(day)
+            sideAInput = app.getOptionBox(Recipe.sideALabelPrefix + day)
+            sideBInput = app.getOptionBox(Recipe.sideBLabelPrefix + day)
+        
+            updateAssignment(day, mainDishInput, sideAInput, sideBInput)
+        
+        app.infoBox("Success", "Successfully updated recipe assignments!")
 
+    except:
+        app.errorBox("ERROR", "Error occurred during recipe assignment. See console log for details.")
+
+    for i in range(2):
+        print("=====================================")    
+    
 def updateAssignment(day, mainDishInput, sideAInput, sideBInput):
     dayObject = DayAssignment.getExistingDay(getDateEntry(), day)
-    dayObject.updateRecipeAssignment(mainDishInput, sideAInput, sideBInput)
     
-def checkEntriesForCalendar(day, mainDishInput, sideAInput, sideBInput):
-    dateUserEntry = getDateEntry()
+    inputsMealIdExists, assignmentHasChanged, inputsMealId = dayObject.checkAssignmentStatus(mainDishInput, sideAInput, sideBInput)
+    dayObject.updateRecipeAssignment(mainDishInput, sideAInput, sideBInput, inputsMealIdExists, assignmentHasChanged, inputsMealId)
+    checkEntriesForCalendar(dayObject.dayName, dayObject.weekOfDate, mainDishInput, sideAInput, sideBInput, assignmentHasChanged)
+
+def checkEntriesForCalendar(day, weekOfDate, mainDishInput, sideAInput, sideBInput, assignmentHasChanged):
     summary = "{}, {}, {}".format(mainDishInput, sideAInput, sideBInput)     
     nonePhrases = ["None, ", ", None", "None"]
     
@@ -124,20 +178,24 @@ def checkEntriesForCalendar(day, mainDishInput, sideAInput, sideBInput):
         if summary.__contains__(phrase):
             summary = summary.replace(phrase, "")
             
-    if dateUserEntry != "" and summary != "":           
-        dateEntry = datetime.strptime(dateUserEntry, dateFormat)
-        addToCalendar(day, dateEntry, summary)
-    elif dateUserEntry == "":
-        print("WARNING: Date field was left blank -- will not create calendar event")
-        # TODO: Add pop-up
-    elif summary == "":
-        print("WARNING: No recipes selected for {} -- will not create calendar event".format(day))
-        # TODO: Add pop-up        
+    if assignmentHasChanged:
+        if app.getCheckBox("Update"):
+            addToCalendar(day, weekOfDate, summary)
+        else:
+            print("Calendar will not be changed because update checkbox is not ticked in settings")
     
 def addToCalendar(day, dateEntry, summary):
     dateDict = {}        
-    dateDict[day] = datetime.strftime(dateEntry + timedelta(days=daysOfWeek.index(day)), dateFormat) 
-    #Calendar.main(summary, dateDict[day])
+    dateDict[day] = datetime.strftime(datetime.strptime(dateEntry, dateFormat) + timedelta(days=daysOfWeek.index(day)), dateFormat) 
+    Calendar.main(summary, dateDict[day], app.getEntry(startLabelDinner), app.getEntry(endLabelDinner))
 
 configureGui(app, handleOptionBox, press)
 app.go()
+
+# TODO:
+# * Checkbox for no meals - would set all meal choices to None automatically
+# * Store settings in db
+# * Pop ups:
+    # - alert that if trying to add new date, need to have drop down set to new
+    # - alert when duplicate date is entered
+# * double check all logic for which week of dates are shown in list as well as which is selected as default when adding a recipe

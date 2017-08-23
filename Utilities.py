@@ -94,12 +94,12 @@ def generateNewKey(idColumn, tableName):
         return newKey
     else: return None
 
-def listOptions(nameColumn, tableName, returnList = False): # Method for displaying all of the possible input options currently available
+def listOptions(nameColumn, tableName, returnList = False, orderByClause = ""): # Method for displaying all of the possible input options currently available
     listOfOptions = []
     namePosition = 0
     connection = DataConnection()
     
-    query = "SELECT " + nameColumn + " FROM " + tableName
+    query = "SELECT " + nameColumn + " FROM " + tableName + " " + orderByClause
 
     result = connection.runQuery(query)
     resultList = result.fetchall()

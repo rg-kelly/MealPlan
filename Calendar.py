@@ -20,6 +20,7 @@ except ImportError:
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'Google Calendar API Python Quickstart'
+dateFormat = "%Y-%m-%d"
 
 
 def get_credentials():
@@ -50,37 +51,45 @@ def get_credentials():
         print('Storing credentials to ' + credential_path)
     return credentials
 
-def main(summary = "More Food", date = "2017-08-01"):
-    """Shows basic usage of the Google Calendar API.
-
-    Creates a Google Calendar API service object and outputs a list of the next
-    10 events on the user's calendar.
-    """
+def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.now(), dateFormat), start = "5:00", end = "6:00"):
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
-    service = discovery.build('calendar', 'v3', http=http)
-
-    now = datetime.datetime.utcnow().isoformat() + 'Z' # 'Z' indicates UTC time
-    #print('Getting the upcoming 10 events')
+    service = discovery.build('calendar', 'v3', http=http, developerKey='complete-road-172122')
+    
+    mealCalendarId = 'qn8ga252asppaafdm1doffesh0@group.calendar.google.com'
+    minDate = '{}T00:00:00Z'.format(date)
+    maxDate = '{}T00:00:00Z'.format(datetime.datetime.strftime(datetime.datetime.strptime(date, dateFormat) + datetime.timedelta(days=1), dateFormat))
     eventsResult = service.events().list(
-        calendarId='primary', timeMin=now, maxResults=10, singleEvents=True,
-        orderBy='startTime').execute()
-    events = eventsResult.get('items', [])
+        calendarId=mealCalendarId, timeMin=minDate, timeMax=maxDate, maxResults=1, singleEvents=True,
+        orderBy='startTime').execute()    
+    events = eventsResult.get('items', [])    
+    newSummaryIsNone = (summaryParam == "")
+    
+    if events:
+        if newSummaryIsNone:
+            print("====== Deleting existing event ======")
+            service.events().delete(calendarId=mealCalendarId, eventId=events[0].get('id', None)).execute()
+        else:
+            event = service.events().get(calendarId=mealCalendarId, eventId=events[0].get('id', None)).execute()
+            currentSummary = event.get('summary', None)
+            
+            if currentSummary != None and currentSummary != summaryParam:            
+                print("====== Updating existing event ======")
+                event['summary'] = summaryParam
+                updated_event = service.events().update(calendarId=mealCalendarId, eventId=event['id'], body=event).execute()
+                print(updated_event['updated'])
+            else:
+                print("====== Summary did not change - nothing to do here ======")        
+                
+    elif not events and not newSummaryIsNone:
+        eventBody = {"summary": summaryParam,
+         "start": {"dateTime": "{}T1{}:00-07:00".format(date, start)},
+         "end": {"dateTime": "{}T1{}:00-07:00".format(date, end)}}
+        event = service.events().insert(calendarId=mealCalendarId, body=eventBody).execute()
+        print("====== Event created ======")
 
-    ## Mine ##
-    event = {"summary": summary,
-             "start": {"dateTime": "{}T15:00:00-07:00".format(date)},
-             "end": {"dateTime": "{}T16:00:00-07:00".format(date)}}
-    event = service.events().insert(calendarId='qn8ga252asppaafdm1doffesh0@group.calendar.google.com', body=event).execute()
-    print('Event created: {}'.format(event.get('htmlLink')))
-    ##
-
-    if not events:
-        print('No upcoming events found.')
-    for event in events:
-        start = event['start'].get('dateTime', event['start'].get('date'))
-        #print(start, event['summary'])
-
-
-#if __name__ == '__main__':
-    #main()
+    elif not events and newSummaryIsNone:
+        print("====== No current events and no new summary is provided - nothing to do here ======")
+            
+if __name__ == '__main__':
+    main()

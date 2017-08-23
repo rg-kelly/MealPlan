@@ -78,13 +78,18 @@ class DayAssignment:
     
         if idInfo != None: return idInfo[0]
         else: return None
-        
-    def updateRecipeAssignment(self, mainDishInput, sideAInput, sideBInput):
+    
+    def checkAssignmentStatus(self, mainDishInput, sideAInput, sideBInput):
         currentMealId = DayAssignment.getMealIdFromRecipeNames(self.mainDish, self.sideA, self.sideB)
         inputsMealId = DayAssignment.getMealIdFromRecipeNames(mainDishInput, sideAInput, sideBInput)
-        inputsMealIdExists = (inputsMealId != None)
         
-        if currentMealId != inputsMealId:
+        inputsMealIdExists = (inputsMealId != None)
+        assignmentHasChanged = (currentMealId != inputsMealId)
+        
+        return inputsMealIdExists, assignmentHasChanged, inputsMealId
+    
+    def updateRecipeAssignment(self, mainDishInput, sideAInput, sideBInput, inputsMealIdExists, assignmentHasChanged, inputsMealId):
+        if assignmentHasChanged:
             connection = DataConnection()
             
             if not inputsMealIdExists:
@@ -96,8 +101,7 @@ class DayAssignment:
             self.mainDish, self.sideA, self.sideB = mainDishInput, sideAInput, sideBInput
             updateQuery = "UPDATE {} SET {} = %s WHERE {} = {} AND {} = {}".format(DayAssignment.dayAssignmentTable, DayAssignment.mealIdColumn, DayAssignment.dayIdColumn, str(self.dayId), WeekOfDate.dateIdColumn, str(self.dateId))
             updateBindingVariable = (inputsMealId,)
-            connection.updateData(updateQuery, updateBindingVariable)
-            
+            connection.updateData(updateQuery, updateBindingVariable)            
             connection.closeConnection()
         
             print("Successfully updated the meal for {}".format(self.dayName))
@@ -138,15 +142,7 @@ class DayAssignment:
 
         print("Successfully added day for {}:{}".format(self.weekOfDate, self.dayName))
         print(self)
-
-    def generateJoin(weekOfDate, typeId, recipeTypeIdColumn):
-        joinString = """{0} join {1} on {0}.{2} = {1}.{3}
-                            join {4} on {1}.{5} = {4}.{5}
-                            join {6} on {6}.{7} = {4}.{7}
-                        where {6}.{8} = '{9}' and {0}.{10} = {11};""".format(Recipe.recipeTable, DayAssignment.mealAssignmentTable, Recipe.recipeIdColumn, recipeTypeIdColumn, DayAssignment.dayTable, DayAssignment.mealIdColumn, WeekOfDate.dateTable, WeekOfDate.dateIdColumn, WeekOfDate.dateNameColumn, weekOfDate, Recipe.typeIdColumn, typeId)
-        
-        return joinString
-
+    
     def __str__(self):        
         message = "--- Summary ---\n"
         message += "Day name: " + self.dayName + "\n"
