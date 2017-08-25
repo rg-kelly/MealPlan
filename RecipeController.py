@@ -14,6 +14,9 @@ dateFormat = "%Y-%m-%d"
 timeFormat = "%I:%M"
 newOption = "- Select or Add New -"
 
+import ctypes
+ctypes.windll.user32.ShowWindow( ctypes.windll.kernel32.GetConsoleWindow(), 6 )
+
 def addRecipe(recipeName, recipeType):
     recipe = Recipe.createNewRecipe(recipeName, recipeType)
     recipe.add()
