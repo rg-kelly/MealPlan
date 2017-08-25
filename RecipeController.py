@@ -11,6 +11,7 @@ from Settings import Settings
 
 app = gui("Meal Plan Configuration")
 dateFormat = "%Y-%m-%d"
+timeFormat = "%I:%M"
 newOption = "- Select or Add New -"
 
 def addRecipe(recipeName, recipeType):
@@ -44,6 +45,21 @@ def validateDateEntry(dateInput):
         return True
     except ValueError:
         return False
+
+def validateTimeEntries(startTime, endTime):
+    try:
+        startTime = datetime.strptime(startTime, timeFormat)
+        endTime = datetime.strptime(endTime, timeFormat)
+        
+        if startTime > endTime:
+            errorMessage = "Start time must be less than the end time."
+            app.error(errorMessage)
+            raise Exception(errorMessage)
+        
+    except:
+        errorMessage = "Either start time or end time is not formatted correctly. Make sure it is like 3:00."
+        app.error(errorMessage)
+        raise Exception(errorMessage)
 
 def getDateEntry(notifyIfManual = False):
     selection = app.getOptionBox(dateEntryLabel)
@@ -83,9 +99,40 @@ def press(btn):
         pressDateGo()
     elif btn == "Update":
         pressSettingsUpdate()
+    elif btn.startswith("None"):
+        pressNoneMeal(btn)
         
-def pressSettingsUpdate(): #TODO!
-    return True
+def pressNoneMeal(buttonTitle):
+    day = getDayFromButton(buttonTitle)
+    
+    app.setOptionBox(day, noneButtonLabel)
+    app.setOptionBox(Recipe.sideALabelPrefix + day, noneButtonLabel)
+    app.setOptionBox(Recipe.sideBLabelPrefix + day, noneButtonLabel)
+    
+def getDayFromButton(buttonTitle):
+    day = buttonTitle.split("_")[1]
+    
+    return day
+        
+def pressSettingsUpdate():
+    try:
+        dinnerStart = app.getEntry(startLabelDinner)
+        dinnerEnd = app.getEntry(endLabelDinner)
+        updateCalendar = app.getCheckBox(updateCheckBoxLabel)
+        
+        validateTimeEntries(dinnerStart, dinnerEnd)
+
+        existingSettings = Settings.getExistingSettings()
+        newDictionary = {dinnerKey: {startKey: dinnerStart, endKey: dinnerEnd}, updateKey: updateCalendar}
+        existingSettings.updateExistingSettings(newDictionary)
+        
+        message = "Successfully updated the settings!"
+        app.info(message)
+        app.infoBox("Success", message)
+    except:
+        errorMessage = "Error occurred while updating the settings, see console output for details."
+        app.error(errorMessage)
+        app.errorBox("ERROR", errorMessage)
         
 def pressDateGo():
     dateEntry, isManualDateEntry = getDateEntry(notifyIfManual=True)
@@ -132,6 +179,9 @@ def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideAT
         handleOptionBox(day, actionType, Recipe.recipeNameColumn, mainTableParameter, row, column)
         handleOptionBox(Recipe.sideALabelPrefix + day, actionType, Recipe.recipeNameColumn, sideATableParameter, row, column + 1)
         handleOptionBox(Recipe.sideBLabelPrefix + day, actionType, Recipe.recipeNameColumn, sideBTableParameter, row, column + 2)
+        
+        if actionType == "add":
+            app.addNamedButton("None", noneButtonLabel + "_" + day, press, row = row, column = column + 3)
         
         row += 1
 
@@ -206,7 +256,3 @@ def addToCalendar(day, dateEntry, summary):
 
 configureGui(app, handleOptionBox, press)
 app.go()
-
-# TODO:
-# * Checkbox for no meals - would set all meal choices to None automatically
-# * Store settings in db

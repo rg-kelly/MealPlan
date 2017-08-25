@@ -12,6 +12,7 @@ newRecipeLabel = "Recipe Name"
 recipeTypeLabel = "Recipe Type"
 dateEntryLabel = "Week Of: "
 newDateEntryLabel = "Add: "
+noneButtonLabel = "None"
 
 headingRow = 0
 defaultRow = 0
@@ -32,13 +33,11 @@ updateCheckBoxLabel = "Update"
 dinnerKey = 'dinner'
 startKey = 'start'
 endKey = 'end'
-dinnerTimeSetting = Settings.getExistingSetting(dinnerKey)
-startTime = dinnerTimeSetting.settingDictionary[dinnerKey][startKey]
-endTime = dinnerTimeSetting.settingDictionary[dinnerKey][endKey]
-
 updateKey = 'update_calendar'
-updateCalendarSetting = Settings.getExistingSetting(updateKey)
-updateCalendar = literal_eval(updateCalendarSetting.settingDictionary[updateKey])
+currentSettings = Settings.getExistingSettings()
+startTime = currentSettings.settingDictionary[dinnerKey][startKey]
+endTime = currentSettings.settingDictionary[dinnerKey][endKey]
+updateCalendar = currentSettings.settingDictionary[updateKey]
 ###############################
 
 def configureGui(app, handleOptionBox, press):
@@ -47,12 +46,12 @@ def configureGui(app, handleOptionBox, press):
     app.startTabbedFrame("recipeSubtabbedFrame")
     app.startTab("Calendar Settings")
     app.addCheckBox(updateCheckBoxLabel)
-    app.setCheckBox(updateCheckBoxLabel, ticked=updateCalendar, callFunction=False) # TODO Store in db
+    app.setCheckBox(updateCheckBoxLabel, ticked=updateCalendar, callFunction=False)
     app.addLabel("dinnerSettingsLabel","Dinner Settings")
     app.addLabelEntry(startLabelDinner)
-    app.setEntry(startLabelDinner, "{}".format(startTime)) # TODO Store in db
+    app.setEntry(startLabelDinner, "{}".format(startTime))
     app.addLabelEntry(endLabelDinner)
-    app.setEntry(endLabelDinner, "{}".format(endTime)) # TODO Store in db
+    app.setEntry(endLabelDinner, "{}".format(endTime))
     app.addButton("Update", press)
     app.stopTab()
     
