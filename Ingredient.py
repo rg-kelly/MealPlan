@@ -1,6 +1,6 @@
 from DataConnection import DataConnection
 import Utilities
-#import Recipe
+from RecipeModel import *
 
 class Ingredient:
     ingredientTable = "Ingredient"
@@ -18,26 +18,26 @@ class Ingredient:
         
         return Ingredient(ingredientId, ingredientName)
 
-    @classmethod
-    def collectIngredientInfo(cls): # Method for collecting ingredient information from user
-        print("Enter the names of the required ingredients.") # Instructions for entering ingredient information
-        print("After you type the ingredient name, you will be prompted to enter the required amount for that ingredient.")
-        print("Type 'done' when finished entering all the ingredients.")
+    #@classmethod
+    #def collectIngredientInfo(cls): # Method for collecting ingredient information from user
+        #print("Enter the names of the required ingredients.") # Instructions for entering ingredient information
+        #print("After you type the ingredient name, you will be prompted to enter the required amount for that ingredient.")
+        #print("Type 'done' when finished entering all the ingredients.")
         
-        ingredientList = []
-        count = 1
-        done = False
+        #ingredientList = []
+        #count = 1
+        #done = False
         
-        while not done:
-            ingredientName = input("Ingredient #" + str(count) + ": ")
+        #while not done:
+            #ingredientName = input("Ingredient #" + str(count) + ": ")
 
-            if (ingredientName == 'done'): done = True
-            else:           
-                entireElement = input("Enter the required amount for " + ingredientName + " (e.g. 1 cup): ")
-                ingredientList += [[entireElement, ingredientName]]     # Add the input amount/units and ingredient name to list as a list (list within a list format)
-                count += 1
+            #if (ingredientName == 'done'): done = True
+            #else:           
+                #entireElement = input("Enter the required amount for " + ingredientName + " (e.g. 1 cup): ")
+                #ingredientList += [[entireElement, ingredientName]]     # Add the input amount/units and ingredient name to list as a list (list within a list format)
+                #count += 1
                 
-        return ingredientList      
+        #return ingredientList      
 
     @classmethod
     def getExistingIngredients(cls, recipeIdNumber): # Method for returning ingredient information from the database

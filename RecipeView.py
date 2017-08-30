@@ -28,6 +28,7 @@ goButtonColumn = newDateEntryColumn + 1
 startLabelDinner = "Start: "
 endLabelDinner = "End: "
 updateCheckBoxLabel = "Update"
+recipeTextBoxLabel = "recipeTextBoxLabel"
 
 ### Settings values from DB ###
 dinnerKey = 'dinner'
@@ -57,7 +58,11 @@ def configureGui(app, handleOptionBox, press):
     
     app.startTab("Add Recipes")
     addItem(recipeNameMaxLength, "Recipe", app, press)
-    handleOptionBox(recipeTypeLabel, "add", Recipe.typeNameColumn, Recipe.typeTable, 1, 2)
+    handleOptionBox(recipeTypeLabel, "add", Recipe.typeNameColumn, Recipe.typeTable, 1, 2)    
+    addItem(recipeNameMaxLength, "Ingredient", app, press, rowStart=2, columnStart=1)
+    app.addLabelEntry("Amount", row=3, column=2)
+    app.addLabel("Steps", "Steps", row = 4, column = 1)
+    app.addScrolledTextArea(recipeTextBoxLabel, row = 5, colspan = 4)
     app.stopTab()
 
     app.startTab("Assign Recipes")
@@ -68,4 +73,4 @@ def configureGui(app, handleOptionBox, press):
     app.setEntryDefault(newDateEntryLabel, "yyyy-mm-dd")
     app.addButton("Go", press, row = dateRow, column = goButtonColumn)
     
-    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", "Assign Recipes")
+    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", "Add Recipes")

@@ -3,8 +3,10 @@ import Utilities
 
 class Recipe:
     recipeTable = "Recipe"
+    recipeElementTable = "Recipe_Element"
     recipeIdColumn = "Recipe_ID"
     recipeNameColumn = "Recipe_Name"
+    amountNameColumn = "Amount"    
     
     typeTable = "Type"
     typeIdColumn = "Type_ID"

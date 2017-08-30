@@ -94,8 +94,11 @@ def getDateEntry(notifyIfManual = False):
 def press(btn):
     if btn == "Cancel":
         app.stop()
-    elif btn == "Add":
-        pressRecipeAdd()
+    elif btn.startswith("Add"):
+        if btn.endswith("Recipe"):
+            pressRecipeAdd()
+        elif btn.endswith("Ingredient"):
+            print(btn)
     elif btn == "Submit":
         pressRecipeAssign()
     elif btn == "Go":

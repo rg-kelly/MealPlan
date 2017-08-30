@@ -1,13 +1,16 @@
 from appJar import gui
 
-def addItem(maximumLength, itemGroupName, app, press):
+def addItem(maximumLength, itemGroupName, app, press, rowStart = 0, columnStart = 1):
     label = "{} Name".format(itemGroupName)
     heading = "Add {}s".format(itemGroupName)
     
+    headingRow = rowStart
+    entryRow = headingRow + 1
+    
     #app.startTab(heading)
-    app.addLabel(heading, heading, 0, 1, colspan = 2)
-    app.addLabelEntry(label, 1, 1)
+    app.addLabel(heading, heading, headingRow, columnStart, colspan = 2)
+    app.addLabelEntry(label, entryRow, columnStart)
     app.setEntryFocus(label)
     app.setEntryMaxLength(label, maximumLength)
-    app.addButton("Add", press, row = 3, column = 1, colspan = 2)
+    app.addNamedButton("Add", "Add" + itemGroupName, press, row = entryRow, column = columnStart + 2)
     #app.stopTab()
