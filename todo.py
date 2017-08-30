@@ -7,4 +7,6 @@ TODO:
 - Ability to pull up current recipe, view details, and update as needed
 - Receipt entry screen to keep track of ingredient pricing
 - Intelligence to project this week's grocery bill (would need some kind of inventory tracker and place to add misc foods like snacks)
+- When choose main dish, auto select sides based on most common pairing
+- Amount should be entered with the number in a text box and the units as a dropdown (tbsp, tsp, cups, etc.)
 """

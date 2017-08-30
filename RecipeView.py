@@ -61,7 +61,6 @@ def configureGui(app, handleOptionBox, press):
     handleOptionBox(recipeTypeLabel, "add", Recipe.typeNameColumn, Recipe.typeTable, 1, 2)    
     addItem(recipeNameMaxLength, "Ingredient", app, press, rowStart=2, columnStart=1)
     app.addLabelEntry("Amount", row=3, column=2)
-    app.addLabel("Steps", "Steps", row = 4, column = 1)
     app.addScrolledTextArea(recipeTextBoxLabel, row = 5, colspan = 4)
     app.stopTab()
 
