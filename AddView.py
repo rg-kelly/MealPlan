@@ -1,7 +1,7 @@
 from appJar import gui
 
 def addItem(maximumLength, itemGroupName, app, press, rowStart = 0, columnStart = 1):
-    label = "{} Name".format(itemGroupName)
+    label = "{} Name ".format(itemGroupName)
     heading = "Add {}s".format(itemGroupName)
     
     headingRow = rowStart
@@ -12,5 +12,5 @@ def addItem(maximumLength, itemGroupName, app, press, rowStart = 0, columnStart 
     app.addLabelEntry(label, entryRow, columnStart)
     app.setEntryFocus(label)
     app.setEntryMaxLength(label, maximumLength)
-    app.addNamedButton("Add", "Add" + itemGroupName, press, row = entryRow, column = columnStart + 2)
+    app.addNamedButton("Add", "Add" + itemGroupName, press, row = entryRow, column = columnStart + 4)
     #app.stopTab()

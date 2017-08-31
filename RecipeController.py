@@ -13,13 +13,16 @@ app = gui("Meal Plan Configuration")
 dateFormat = "%Y-%m-%d"
 timeFormat = "%I:%M"
 newOption = "- Select or Add New -"
+ingredientsList = []
 
 import ctypes
 ctypes.windll.user32.ShowWindow( ctypes.windll.kernel32.GetConsoleWindow(), 6 )
 
-def addRecipe(recipeName, recipeType):
-    recipe = Recipe.createNewRecipe(recipeName, recipeType)
+def addRecipe(recipeName, recipeType, cookbookType, description):
+    recipe = Recipe.createNewRecipe(recipeName, recipeType, cookbookType, ingredientsList, description)
     recipe.add()
+    
+    app.infoBox(recipeName, "Successfully added new recipe!\n\n{}".format(str(recipe)))
 
 def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultRow, column = defaultColumn):
     isAdd = (actionType == "add")
@@ -98,7 +101,7 @@ def press(btn):
         if btn.endswith("Recipe"):
             pressRecipeAdd()
         elif btn.endswith("Ingredient"):
-            print(btn)
+            pressIngredientAdd()
     elif btn == "Submit":
         pressRecipeAssign()
     elif btn == "Go":
@@ -108,6 +111,55 @@ def press(btn):
     elif btn.startswith("None"):
         pressNoneMeal(btn)
         
+def pressIngredientAdd():
+    ingredientName = app.getEntry(newIngredientLabel)
+    amount = app.getEntry(amountEntryLabel)
+    units = app.getOptionBox(amountUnitsLabel)
+    isNewIngredient = (getKnownInfo(ingredientName, Ingredient.Ingredient.ingredientIdColumn, Ingredient.Ingredient.ingredientNameColumn, Ingredient.Ingredient.ingredientTable, False) == None)
+
+    if ingredientName != "":  
+        ingredientsList.append({'amount': amount, 'name': ingredientName, 'units': units})
+        
+        if isNewIngredient:
+            ingredient = Ingredient.Ingredient(ingredientName)
+            ingredient.add()
+            
+            message = "Successfully added new ingredient!"
+            app.info(message)
+            
+        elif not isNewIngredient:
+            message = "Ingredient '{}' already exists.".format(ingredientName)
+            app.warn(message)
+        
+    app.clearEntry(newIngredientLabel)
+    app.clearEntry(amountEntryLabel)
+    app.setFocus(newIngredientLabel)
+    
+def pressRecipeAdd():
+    recipeName = app.getEntry(newRecipeLabel)
+    isNewRecipe = (getKnownInfo(recipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)
+    actionType=getActionType()
+    
+    if recipeName != "" and isNewRecipe:
+        recipeType = app.getOptionBox(recipeTypeLabel)
+        cookbookType = app.getOptionBox(recipeCookbookTypeLabel)
+        description = app.getTextArea(recipeTextBoxLabel)
+        addRecipe(recipeName, recipeType, cookbookType, description)
+        
+        if actionType == "update":
+            configureRecipeDropDowns()
+            
+    elif not isNewRecipe:
+        errorMessage = "Recipe '{}' already exists. Please enter a unique recipe name.".format(recipeName)
+        app.warn(errorMessage)
+        app.warningBox("Duplicate Recipe", errorMessage)
+    
+    app.clearEntry(newRecipeLabel, callFunction=False)
+    app.clearTextArea(recipeTextBoxLabel, callFunction=False)
+    
+    global ingredientsList
+    ingredientsList = []
+    
 def pressNoneMeal(buttonTitle):
     day = getDayFromButton(buttonTitle)
     
@@ -195,27 +247,6 @@ def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideAT
         app.addButton("Submit", press, row = submitRow, column = 0, colspan = 2)
         app.stopTab()
         app.stopTabbedFrame()
-        
-def pressRecipeAdd():
-    recipeName = app.getEntry(newRecipeLabel)
-    recipeType = app.getOptionBox(recipeTypeLabel)
-    isNewRecipe = (getKnownInfo(recipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)
-    actionType=getActionType()
-    
-    if recipeName != "" and isNewRecipe:        
-        addRecipe(recipeName, recipeType)
-        
-        if actionType == "update":
-            configureRecipeDropDowns()
-        
-        app.infoBox(recipeName, "Successfully added new recipe!")
-            
-    elif not isNewRecipe:
-        errorMessage = "Recipe '{}' already exists. Please enter a unique recipe name.".format(recipeName)
-        print(errorMessage)
-        app.errorBox("Error: Duplicate Recipe", errorMessage)
-    
-    app.clearEntry(newRecipeLabel, callFunction=False)
 
 def pressRecipeAssign():
     try:
@@ -259,6 +290,26 @@ def addToCalendar(day, dateEntry, summary):
     dateDict = {}        
     dateDict[day] = datetime.strftime(datetime.strptime(dateEntry, dateFormat) + timedelta(days=daysOfWeek.index(day)), dateFormat) 
     Calendar.main(summary, dateDict[day], app.getEntry(startLabelDinner), app.getEntry(endLabelDinner))
+
+#def collectIngredientInfo(cls): # Method for collecting ingredient information from user
+    #print("Enter the names of the required ingredients.") # Instructions for entering ingredient information
+    #print("After you type the ingredient name, you will be prompted to enter the required amount for that ingredient.")
+    #print("Type 'done' when finished entering all the ingredients.")
+    
+    #ingredientList = []
+    #count = 1
+    #done = False
+    
+    #while not done:
+        #ingredientName = input("Ingredient #" + str(count) + ": ")
+
+        #if (ingredientName == 'done'): done = True
+        #else:           
+            #entireElement = input("Enter the required amount for " + ingredientName + " (e.g. 1 cup): ")
+            #ingredientList += [[entireElement, ingredientName]]     # Add the input amount/units and ingredient name to list as a list (list within a list format)
+            #count += 1
+            
+    #return ingredientList 
 
 configureGui(app, handleOptionBox, press)
 app.go()

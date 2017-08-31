@@ -1,16 +1,24 @@
 from DataConnection import DataConnection
 import Utilities
+from Ingredient import Ingredient
+from Amount_Units import Amount_Units
 
 class Recipe:
     recipeTable = "Recipe"
     recipeElementTable = "Recipe_Element"
     recipeIdColumn = "Recipe_ID"
     recipeNameColumn = "Recipe_Name"
+    recipeDescriptionColumn = "Description"
     amountNameColumn = "Amount"    
     
     typeTable = "Type"
     typeIdColumn = "Type_ID"
     typeNameColumn = "Type"
+    cookbookTypeIdColumn = "Cookbook_Type_ID"
+    isCookbookColumn = "isCookbook"
+    
+    isNotCookbook = 0
+    isCookbook = 1
     
     mainTypeId = 1
     sideTypeId = 2
@@ -19,20 +27,23 @@ class Recipe:
     sideALabelPrefix = "side_A_"
     sideBLabelPrefix = "side_B_"    
     
-    whereTypeId ="{0} WHERE {1} = {2} OR {1} = ".format(recipeTable, typeIdColumn, otherTypeId)
-    whereMainTypeId = "{} {}".format(whereTypeId, str(mainTypeId))
-    whereSideTypeId = "{} {}".format(whereTypeId, str(sideTypeId))
+    whereTypeId ="{0} JOIN {5} ON {0}.{1} = {5}.{1} WHERE {5}.{3} = {4} AND ({0}.{1} = {2} OR {0}.{1} = ".format(recipeTable, typeIdColumn, otherTypeId, isCookbookColumn, isNotCookbook, typeTable)
+    whereMainTypeId = "{} {})".format(whereTypeId, str(mainTypeId))
+    whereSideTypeId = "{} {})".format(whereTypeId, str(sideTypeId))
 
-    def __init__(self, recipeId, recipeName, recipeType):
+    def __init__(self, recipeId, recipeName, recipeType, cookbookType, ingredients, description):
         self.recipeId = recipeId
         self.recipeName = recipeName
         self.recipeType = recipeType
+        self.cookbookType = cookbookType
+        self.ingredients = ingredients
+        self.description = description
 
     @classmethod
-    def createNewRecipe(cls, recipeName, recipeType):       
+    def createNewRecipe(cls, recipeName, recipeType, cookbookType, ingredients, description):       
         recipeId = Utilities.generateNewKey(Recipe.recipeIdColumn, Recipe.recipeTable)
         
-        return Recipe(recipeId, recipeName, recipeType)
+        return Recipe(recipeId, recipeName, recipeType, cookbookType, ingredients, description)
     
     @classmethod
     def getExistingRecipe(cls, recipeId, recipeName):
@@ -46,31 +57,51 @@ class Recipe:
             select = Recipe.recipeIdColumn
             where = Recipe.recipeNameColumn
             whereIsId = False
-        else:
-            print("DEBUG: for some reason not setting vars for recipe '{}' id {}".format(recipeName, recipeId))
         
         recipeInfo = Utilities.getKnownInfo(known, select, where, Recipe.recipeTable, whereIsId)
         recipeType = Utilities.getKnownInfo(Utilities.getKnownInfo(known, Recipe.typeIdColumn, where, Recipe.recipeTable, whereIsId), Recipe.typeNameColumn, Recipe.typeIdColumn, Recipe.typeTable, True)
+        cookbookType = Utilities.getKnownInfo(Utilities.getKnownInfo(known, Recipe.cookbookTypeIdColumn, where, Recipe.recipeTable, whereIsId), Recipe.typeNameColumn, Recipe.typeIdColumn, Recipe.typeTable, True)
+        description = Utilities.getKnownInfo(known, Recipe.recipeDescriptionColumn, where, Recipe.recipeTable, whereIsId)
         
-        if recipeId:            
-            return Recipe(recipeId, recipeInfo, recipeType)
+        if recipeId:  
+            ingredients = Ingredient.getRecipeIngredients(recipeId)
+            return Recipe(recipeId, recipeInfo, recipeType, cookbookType, ingredients, description)
         elif recipeName:
-            return Recipe(recipeInfo, recipeName, recipeType)
+            ingredients = Ingredient.getRecipeIngredients(recipeInfo)
+            return Recipe(recipeInfo, recipeName, recipeType, cookbookType, ingredients, description)
 
     def add(self):
         connection = DataConnection()
         
-        query = "INSERT INTO {} ({}, {}, {}) VALUES (%s, %s, %s)".format(Recipe.recipeTable, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.typeIdColumn)
+        recipeQuery = "INSERT INTO {} ({}, {}, {}, {}, {}) VALUES (%s, %s, %s, %s, %s);".format(Recipe.recipeTable, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.typeIdColumn, Recipe.cookbookTypeIdColumn, Recipe.recipeDescriptionColumn)
+        recipeInsertValues = (self.recipeId, self.recipeName, Utilities.getKnownInfo(self.recipeType, self.typeIdColumn, self.typeNameColumn, self.typeTable, False), Utilities.getKnownInfo(self.cookbookType, self.typeIdColumn, self.typeNameColumn, self.typeTable, False), self.description)
+        connection.updateData(recipeQuery, recipeInsertValues)
         
-        insertValues = (self.recipeId, self.recipeName, Utilities.getKnownInfo(self.recipeType, self.typeIdColumn, self.typeNameColumn, self.typeTable, False))
-        connection.updateData(query, insertValues)
+        for ingredient in self.ingredients:
+            ingredientId = Utilities.getKnownInfo(ingredient['name'], Ingredient.ingredientIdColumn, Ingredient.ingredientNameColumn, Ingredient.ingredientTable, False)
+            amount = ingredient['amount']
+            amountUnitId = Utilities.getKnownInfo(ingredient['units'], Amount_Units.unitIdColumn, Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, False)
+            
+            bridgeQuery = "INSERT INTO {} ({}, {}, {}, {}) VALUES (%s, %s, %s, %s); ".format(Recipe.recipeElementTable, Recipe.recipeIdColumn, Ingredient.ingredientIdColumn, Recipe.amountNameColumn, Amount_Units.unitIdColumn)
+            bridgeInsertValues = (self.recipeId, ingredientId, amount, amountUnitId)        
+            connection.updateData(bridgeQuery, bridgeInsertValues)
+        
         connection.closeConnection()
-
         print("Successfully added " + "'" + self.recipeName + "' " + "recipe")
 
     def __str__(self):
-        message = "--- Summary ---\n"
-        message += "Recipe name: " + self.recipeName + "\n"
-        message += "Recipe type: " + self.recipeType
+        newLine = "\n"
+        tab = "   "        
+        
+        message = "--- Summary ---" + newLine
+        message += "Recipe name: " + self.recipeName + newLine
+        message += "Recipe type: " + self.recipeType + newLine
+        message += "Cookbook type: " + self.cookbookType + newLine
+        
+        message += "Ingredients: " + newLine        
+        for ingredient in self.ingredients:
+            message += "{} {} {} {} {}".format(tab, ingredient['amount'], ingredient['units'], ingredient['name'], newLine)
+            
+        message += "Description: " + self.description
 
         return message

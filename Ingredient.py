@@ -1,6 +1,7 @@
 from DataConnection import DataConnection
 import Utilities
 from RecipeModel import *
+from Amount_Units import Amount_Units
 
 class Ingredient:
     ingredientTable = "Ingredient"
@@ -8,50 +9,28 @@ class Ingredient:
     ingredientIdColumn = "Ingredient_ID"
     ingredientNameColumn = "Ingredient_Name"
 
-    def __init__(self, ingredientId, ingredientName):
-        self.ingredientId = ingredientId
-        self.ingredientName = ingredientName
+    def __init__(self, ingredientName):
+        self.ingredientName = ingredientName     
 
-    @classmethod
-    def createNewIngredient(cls, ingredientName):
-        ingredientId = Utilities.generateNewKey(Ingredient.ingredientIdColumn, Ingredient.ingredientTable)
-        
-        return Ingredient(ingredientId, ingredientName)
-
-    #@classmethod
-    #def collectIngredientInfo(cls): # Method for collecting ingredient information from user
-        #print("Enter the names of the required ingredients.") # Instructions for entering ingredient information
-        #print("After you type the ingredient name, you will be prompted to enter the required amount for that ingredient.")
-        #print("Type 'done' when finished entering all the ingredients.")
-        
-        #ingredientList = []
-        #count = 1
-        #done = False
-        
-        #while not done:
-            #ingredientName = input("Ingredient #" + str(count) + ": ")
-
-            #if (ingredientName == 'done'): done = True
-            #else:           
-                #entireElement = input("Enter the required amount for " + ingredientName + " (e.g. 1 cup): ")
-                #ingredientList += [[entireElement, ingredientName]]     # Add the input amount/units and ingredient name to list as a list (list within a list format)
-                #count += 1
-                
-        #return ingredientList      
-
-    @classmethod
-    def getExistingIngredients(cls, recipeIdNumber): # Method for returning ingredient information from the database
+    def getRecipeIngredients(recipeIdNumber): # Method for returning ingredient information from the database
         ingredientList = []
-        ingredientNamePosition = 0
-        elementAmountPosition = 1
-        elementUnitsPosition = 2
         
-        connection = DataConnection()
-
-        query = "SELECT I." + Ingredient.ingredientNameColumn + ", E." + Recipe.Recipe.elementAmountColumn + ", E." + Recipe.Recipe.elementUnitsColumn
-        query += " FROM " + Recipe.Recipe.recipeTable + " AS R JOIN " + Recipe.Recipe.elementTable + " AS E ON R." + Recipe.Recipe.recipeIdColumn
-        query += " = E." + Recipe.Recipe.recipeIdColumn + " JOIN " + Ingredient.ingredientTable + " AS I ON I." + Ingredient.ingredientIdColumn
-        query += " = E." + Ingredient.ingredientIdColumn + " WHERE R." + Recipe.Recipe.recipeIdColumn + " = " + str(recipeIdNumber)
+        connection = DataConnection()        
+        query = """SELECT {6}.{0}, {4}.{1}, {9}.{2}
+                    FROM {3} JOIN {4} ON {3}.{5} = {4}.{5}
+                    JOIN {6} ON {6}.{7} = {4}.{7}
+                    JOIN {9} ON {9}.{10} = {4}.{10}
+                    WHERE {3}.{5} = {8};""".format(Ingredient.ingredientNameColumn,
+                                                   Recipe.amountNameColumn,
+                                                   Amount_Units.unitNameColumn,
+                                                   Recipe.recipeTable,
+                                                   Recipe.recipeElementTable,
+                                                   Recipe.recipeIdColumn,
+                                                   Ingredient.ingredientTable,
+                                                   Ingredient.ingredientIdColumn,
+                                                   recipeIdNumber,
+                                                   Amount_Units.amountUnitsTable,
+                                                   Amount_Units.unitIdColumn)
 
         ingredientsResult = connection.runQuery(query)
         ingredientsResultList = ingredientsResult.fetchall()
@@ -59,19 +38,16 @@ class Ingredient:
 
         if ingredientsResultList:
             for item in ingredientsResultList:
-                ingredientList += [[str(item[elementAmountPosition]) + " " + item[elementUnitsPosition], item[ingredientNamePosition]]]
+                ingredientList += [[str(item[Ingredient.amountPosition]), item[Ingredient.unitsPosition], item[Ingredient.ingredientNamePosition]]]
             return ingredientList
         else: return None
 
     def add(self):
         connection = DataConnection()
-
-        query = "INSERT INTO " + Ingredient.ingredientTable + "(" + Ingredient.ingredientIdColumn + ", " + Ingredient.ingredientNameColumn + ") "
-        query += "VALUES (%s, %s)"
-
-        insertValues = (self.ingredientId, self.ingredientName)
-        connection.updateData(query, insertValues)
-        connection.closeConnection      
+        query = "INSERT INTO {0} ({1}) VALUES (%s);".format(Ingredient.ingredientTable, Ingredient.ingredientNameColumn)
+        insertValue = (self.ingredientName,)
+        connection.updateData(query, insertValue)
+        connection.closeConnection
 
     def __str__(self):
         message = "Ingredient name: " + self.ingredientName

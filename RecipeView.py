@@ -5,14 +5,23 @@ from DayAssignment import DayAssignment
 from AddView import addItem
 from Utilities import listOptions
 from Settings import Settings
+from Amount_Units import Amount_Units
 from ast import literal_eval
 
 daysOfWeek = listOptions(DayAssignment.dayNameColumn, DayAssignment.dayTable, True, "ORDER BY {} ASC".format(DayAssignment.dayIdColumn))
-newRecipeLabel = "Recipe Name"
-recipeTypeLabel = "Recipe Type"
+newRecipeLabel = "Recipe Name "
+recipeTypeLabel = "Recipe Type "
+recipeCookbookTypeLabel = "Cookbook Type "
 dateEntryLabel = "Week Of: "
 newDateEntryLabel = "Add: "
 noneButtonLabel = "None"
+newIngredientLabel = "Ingredient Name "
+startLabelDinner = "Start: "
+endLabelDinner = "End: "
+updateCheckBoxLabel = "Update"
+recipeTextBoxLabel = "recipeTextBoxLabel"
+amountUnitsLabel = "Unit "
+amountEntryLabel = "Amount "
 
 headingRow = 0
 defaultRow = 0
@@ -24,11 +33,6 @@ submitRow = typeHeadingRow + 10
 dateSelectionColumn = 0
 newDateEntryColumn = dateSelectionColumn + 1
 goButtonColumn = newDateEntryColumn + 1
-
-startLabelDinner = "Start: "
-endLabelDinner = "End: "
-updateCheckBoxLabel = "Update"
-recipeTextBoxLabel = "recipeTextBoxLabel"
 
 ### Settings values from DB ###
 dinnerKey = 'dinner'
@@ -58,9 +62,11 @@ def configureGui(app, handleOptionBox, press):
     
     app.startTab("Add Recipes")
     addItem(recipeNameMaxLength, "Recipe", app, press)
-    handleOptionBox(recipeTypeLabel, "add", Recipe.typeNameColumn, Recipe.typeTable, 1, 2)    
+    handleOptionBox(recipeTypeLabel, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isNotCookbook), 1, 2)    
+    handleOptionBox(recipeCookbookTypeLabel, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isCookbook), 1, 3)    
     addItem(recipeNameMaxLength, "Ingredient", app, press, rowStart=2, columnStart=1)
-    app.addLabelEntry("Amount", row=3, column=2)
+    app.addLabelEntry(amountEntryLabel, row=3, column=2)
+    handleOptionBox(amountUnitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, 3, 3)
     app.addScrolledTextArea(recipeTextBoxLabel, row = 5, colspan = 4)
     app.stopTab()
 
