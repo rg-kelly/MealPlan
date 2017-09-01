@@ -60,8 +60,16 @@ class Recipe:
         
         recipeInfo = Utilities.getKnownInfo(known, select, where, Recipe.recipeTable, whereIsId)
         recipeType = Utilities.getKnownInfo(Utilities.getKnownInfo(known, Recipe.typeIdColumn, where, Recipe.recipeTable, whereIsId), Recipe.typeNameColumn, Recipe.typeIdColumn, Recipe.typeTable, True)
-        cookbookType = Utilities.getKnownInfo(Utilities.getKnownInfo(known, Recipe.cookbookTypeIdColumn, where, Recipe.recipeTable, whereIsId), Recipe.typeNameColumn, Recipe.typeIdColumn, Recipe.typeTable, True)
-        description = Utilities.getKnownInfo(known, Recipe.recipeDescriptionColumn, where, Recipe.recipeTable, whereIsId)
+        
+        try:
+            cookbookType = Utilities.getKnownInfo(Utilities.getKnownInfo(known, Recipe.cookbookTypeIdColumn, where, Recipe.recipeTable, whereIsId), Recipe.typeNameColumn, Recipe.typeIdColumn, Recipe.typeTable, True)
+        except:
+            cookbookType = None
+        
+        try:
+            description = Utilities.getKnownInfo(known, Recipe.recipeDescriptionColumn, where, Recipe.recipeTable, whereIsId)
+        except:
+            description = None
         
         if recipeId:  
             ingredients = Ingredient.getRecipeIngredients(recipeId)

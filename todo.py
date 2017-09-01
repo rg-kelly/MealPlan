@@ -1,6 +1,6 @@
 """
 TODO:
-- Debug why assign recipes tab fails on go
+- Test getRecipeIngredients
 - Catch don't add recipe if no ingredient info is entered - prompt for entry
 - Errors with recipe add query are not creating ui pop-up
 - On startup, get event summaries from calendar and update assignments in db from changes that may have been made there instead of in app

@@ -1,6 +1,6 @@
 from DataConnection import DataConnection
 import Utilities
-from RecipeModel import *
+import RecipeModel
 from Amount_Units import Amount_Units
 
 class Ingredient:
@@ -13,7 +13,7 @@ class Ingredient:
         self.ingredientName = ingredientName     
 
     def getRecipeIngredients(recipeIdNumber): # Method for returning ingredient information from the database
-        ingredientList = []
+        ingredients = {}
         
         connection = DataConnection()        
         query = """SELECT {6}.{0}, {4}.{1}, {9}.{2}
@@ -21,11 +21,11 @@ class Ingredient:
                     JOIN {6} ON {6}.{7} = {4}.{7}
                     JOIN {9} ON {9}.{10} = {4}.{10}
                     WHERE {3}.{5} = {8};""".format(Ingredient.ingredientNameColumn,
-                                                   Recipe.amountNameColumn,
+                                                   RecipeModel.Recipe.amountNameColumn,
                                                    Amount_Units.unitNameColumn,
-                                                   Recipe.recipeTable,
-                                                   Recipe.recipeElementTable,
-                                                   Recipe.recipeIdColumn,
+                                                   RecipeModel.Recipe.recipeTable,
+                                                   RecipeModel.Recipe.recipeElementTable,
+                                                   RecipeModel.Recipe.recipeIdColumn,
                                                    Ingredient.ingredientTable,
                                                    Ingredient.ingredientIdColumn,
                                                    recipeIdNumber,
@@ -38,8 +38,8 @@ class Ingredient:
 
         if ingredientsResultList:
             for item in ingredientsResultList:
-                ingredientList += [[str(item[Ingredient.amountPosition]), item[Ingredient.unitsPosition], item[Ingredient.ingredientNamePosition]]]
-            return ingredientList
+                ingredients += {'name': item[0], 'amount': item[1], 'units': item[2]}
+            return ingredients
         else: return None
 
     def add(self):
