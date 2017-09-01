@@ -30,10 +30,11 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
     isUpdate = (actionType == "update")
     isSide = (labelName.__contains__("side"))
     isUnit = (labelName.__contains__("Unit"))
+    isUnlabeledSelection = (labelName.__contains__("Selection"))
 
     if nameColumn != WeekOfDate.dateNameColumn:
         optionsList = listOptions(nameColumn, tableName, True)
-    if nameColumn == Recipe.recipeNameColumn:
+    if nameColumn == Recipe.recipeNameColumn and labelName.__contains__("day"):
         optionsList = DayAssignment.updateRecipeList(getDateEntry(), labelName, optionsList, isSide)        
     elif nameColumn == WeekOfDate.dateNameColumn:
         optionsList = WeekOfDate.findClosestWeekOfDate(listOptions=True)
@@ -42,7 +43,7 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
     if isUpdate:
         app.changeOptionBox(labelName, optionsList)
     elif isAdd:        
-        if isSide or isUnit:
+        if isSide or isUnit or isUnlabeledSelection:
             app.addOptionBox(labelName, optionsList, row, column)
         else:
             app.addLabelOptionBox(labelName, optionsList, row, column)
@@ -114,6 +115,15 @@ def press(btn):
         pressNoneMeal(btn)
     elif btn == "Enter":
         pressPurchaseEnter()
+    elif btn == "Update Go":
+        pressUpdateGo()
+    elif btn == "Recipe Update":
+        pressRecipeUpdate()
+        
+def pressUpdateGo():
+    recipeName = app.getOptionBox(updateRecipeLabel)
+    recipe = Recipe.getExistingRecipe(recipeId=False, recipeName=recipeName)
+    recipe.update()
 
 def pressPurchaseEnter():
     ingredientName = app.getOptionBox(ingredientSelectionPriceLabel)

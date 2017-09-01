@@ -96,6 +96,9 @@ class Recipe:
         
         connection.closeConnection()
         print("Successfully added " + "'" + self.recipeName + "' " + "recipe")
+        
+    def update(self):
+        return True
 
     def __str__(self):
         newLine = "\n"
@@ -103,8 +106,8 @@ class Recipe:
         
         message = "--- Summary ---" + newLine
         message += "Recipe name: " + self.recipeName + newLine
-        message += "Recipe type: " + self.recipeType + newLine
-        message += "Cookbook type: " + self.cookbookType + newLine
+        message += "Recipe type: " + str(self.recipeType) + newLine
+        message += "Cookbook type: " + str(self.cookbookType) + newLine
         
         if self.ingredients:
             message += "Ingredients: " + newLine

@@ -29,10 +29,17 @@ storeSelectionLabel = "Store: "
 amountPaidLabel = "$"
 amountPurchasedLabel = "Amount: "
 amountPurchasedUnitsLabel = "Unit"
+updateRecipeLabel = "Recipe Selection"
+recipeTypeLabelUpdate = "Recipe Type: "
+recipeCookbookTypeLabelUpdate = "Cookbook Type: "
+recipeTextBoxLabelUpdate = "updateRecipeTextBoxLabel"
+amountUnitsLabelUpdate = "Update Unit "
+amountEntryLabelUpdate = "Amount  "
 
-addRecipesTab = "Add Recipes"
+addRecipesTab = "Add Recipe"
 assignRecipesTab = "Assign Recipes"
 enterPricesTab = "Enter Prices"
+updateRecipesTab = "Update Recipe"
 
 headingRow = 0
 defaultRow = 0
@@ -94,13 +101,29 @@ def configureGui(app, handleOptionBox, press):
     handleOptionBox(amountUnitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, 3, 3)
     app.addScrolledTextArea(recipeTextBoxLabel, row = 5, colspan = 4)
     app.stopTab()
+    
+    updateRecipeColumnStart = defaultColumn
+    app.startTab(updateRecipesTab)
+    app.addLabel(updateRecipesTab, updateRecipesTab, row = headingRow, column = updateRecipeColumnStart, colspan = 4)
+    handleOptionBox(updateRecipeLabel, "add", Recipe.recipeNameColumn, Recipe.recipeTable, row = headingRow + 1, column = updateRecipeColumnStart + 1) # what if you want to change the name of the recipe? or delete it?
+    app.addNamedButton("Go", "Update Go", press, row = headingRow + 1, column = updateRecipeColumnStart + 2)
+    app.addHorizontalSeparator(row = headingRow + 2, colspan = 4)
+    handleOptionBox(recipeTypeLabelUpdate, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isNotCookbook), row = headingRow + 3, column = updateRecipeColumnStart)    
+    handleOptionBox(recipeCookbookTypeLabelUpdate, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isCookbook), row = headingRow + 3, column = updateRecipeColumnStart + 1)
+    app.addLabel("Ingredient(s)", "Ingredient(s)", row = headingRow + 4, column = updateRecipeColumnStart, colspan = 1)
+    app.addEntry("IngredientEntryLabel", row = headingRow + 5, column = updateRecipeColumnStart, colspan = 2)
+    app.addLabelEntry(amountEntryLabelUpdate, row = headingRow + 5, column = updateRecipeColumnStart + 2)
+    handleOptionBox(amountUnitsLabelUpdate, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, row = headingRow + 5, column = updateRecipeColumnStart + 3)
+    app.addScrolledTextArea(recipeTextBoxLabelUpdate, row = headingRow + 7, colspan = 4)
+    app.addNamedButton("Update", "Recipe Update", press, row = headingRow + 8, column = updateRecipeColumnStart + 1)
+    app.addButton("Delete", press, row = headingRow + 8, column = updateRecipeColumnStart + 2)
+    app.stopTab()
 
     app.startTab(assignRecipesTab)
     app.addLabel(assignRecipesTab, assignRecipesTab, row = headingRow, column = 0, colspan = 4)
-
     handleOptionBox(dateEntryLabel, "add", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, dateRow, dateSelectionColumn)
     app.addLabelEntry(newDateEntryLabel, row = dateRow, column = newDateEntryColumn)
     app.setEntryDefault(newDateEntryLabel, "yyyy-mm-dd")
     app.addButton("Go", press, row = dateRow, column = goButtonColumn)
     
-    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", enterPricesTab)
+    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", updateRecipesTab)
