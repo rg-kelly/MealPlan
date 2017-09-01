@@ -6,6 +6,8 @@ from AddView import addItem
 from Utilities import listOptions
 from Settings import Settings
 from Amount_Units import Amount_Units
+from Ingredient import Ingredient
+from Store import Store
 from ast import literal_eval
 
 daysOfWeek = listOptions(DayAssignment.dayNameColumn, DayAssignment.dayTable, True, "ORDER BY {} ASC".format(DayAssignment.dayIdColumn))
@@ -22,6 +24,15 @@ updateCheckBoxLabel = "Update"
 recipeTextBoxLabel = "recipeTextBoxLabel"
 amountUnitsLabel = "Unit "
 amountEntryLabel = "Amount "
+ingredientSelectionPriceLabel = "Ingredient: "
+storeSelectionLabel = "Store: "
+amountPaidLabel = "$"
+amountPurchasedLabel = "Amount: "
+amountPurchasedUnitsLabel = "Unit"
+
+addRecipesTab = "Add Recipes"
+assignRecipesTab = "Assign Recipes"
+enterPricesTab = "Enter Prices"
 
 headingRow = 0
 defaultRow = 0
@@ -60,23 +71,35 @@ def configureGui(app, handleOptionBox, press):
     app.addButton("Update", press)
     app.stopTab()
     
-    app.startTab("Add Recipes")
+    pricesColumnStart = defaultColumn
+    app.startTab(enterPricesTab)
+    app.addLabel(enterPricesTab, enterPricesTab, row = headingRow, column = pricesColumnStart, colspan = 4)
+    handleOptionBox(ingredientSelectionPriceLabel, "add", Ingredient.ingredientNameColumn, Ingredient.ingredientTable, row = headingRow + 1, column = pricesColumnStart)
+    app.addLabelEntry(amountPurchasedLabel, row = headingRow + 1, column = pricesColumnStart + 1)
+    handleOptionBox(amountPurchasedUnitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, row = headingRow + 1, column = pricesColumnStart + 2)
+    app.addLabelEntry(amountPaidLabel, row = headingRow + 2, column = pricesColumnStart)
+    handleOptionBox(storeSelectionLabel, "add", Store.storeNameColumn, Store.storeTable, row = headingRow + 2, column = pricesColumnStart + 1)
+    app.setOptionBox(storeSelectionLabel, "Valley West Hy-Vee")
+    app.addButton("Enter", press, row = headingRow + 4, column = pricesColumnStart, colspan = 3)
+    app.stopTab()
+    
+    app.startTab(addRecipesTab)
     addItem(recipeNameMaxLength, "Recipe", app, press, bottomButton=True)
     handleOptionBox(recipeTypeLabel, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isNotCookbook), 1, 2)    
     handleOptionBox(recipeCookbookTypeLabel, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isCookbook), 1, 3)
     app.setOptionBox(recipeCookbookTypeLabel, "None")
-    addItem(recipeNameMaxLength, "Ingredient", app, press, rowStart=2, columnStart=1, bottomButton=False)
+    addItem(recipeNameMaxLength, "Ingredient", app, press, rowStart=2, columnStart=1, bottomButton=False, isFirstAdd=False)
     app.addLabelEntry(amountEntryLabel, row=3, column=2)
     handleOptionBox(amountUnitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, 3, 3)
     app.addScrolledTextArea(recipeTextBoxLabel, row = 5, colspan = 4)
     app.stopTab()
 
-    app.startTab("Assign Recipes")
-    app.addLabel("assignRecipesTitle", "Assign Recipes", row = headingRow, column = 0, colspan = 4)
+    app.startTab(assignRecipesTab)
+    app.addLabel(assignRecipesTab, assignRecipesTab, row = headingRow, column = 0, colspan = 4)
 
     handleOptionBox(dateEntryLabel, "add", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, dateRow, dateSelectionColumn)
     app.addLabelEntry(newDateEntryLabel, row = dateRow, column = newDateEntryColumn)
     app.setEntryDefault(newDateEntryLabel, "yyyy-mm-dd")
     app.addButton("Go", press, row = dateRow, column = goButtonColumn)
     
-    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", "Assign Recipes")
+    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", enterPricesTab)

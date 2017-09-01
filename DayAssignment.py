@@ -69,7 +69,6 @@ class DayAssignment:
     def getMealIdFromRecipeNames(mainDish, sideA, sideB):
         connection = DataConnection()
         mainId, sideAId, sideBId = Recipe.getExistingRecipe(False, mainDish).recipeId, Recipe.getExistingRecipe(False, sideA).recipeId, Recipe.getExistingRecipe(False, sideB).recipeId
-        
         query = "SELECT {} FROM {} WHERE {} = {} AND {} = {} AND {} = {};".format(DayAssignment.mealIdColumn, DayAssignment.mealAssignmentTable, DayAssignment.mainIdColumn, mainId, DayAssignment.sideAIdColumn, sideAId, DayAssignment.sideBIdColumn, sideBId)
     
         result = connection.runQuery(query)
