@@ -80,6 +80,7 @@ def configureGui(app, handleOptionBox, press):
     app.addLabelEntry(amountPaidLabel, row = headingRow + 2, column = pricesColumnStart)
     handleOptionBox(storeSelectionLabel, "add", Store.storeNameColumn, Store.storeTable, row = headingRow + 2, column = pricesColumnStart + 1)
     app.setOptionBox(storeSelectionLabel, "Valley West Hy-Vee")
+    app.setFocus(amountPurchasedLabel)
     app.addButton("Enter", press, row = headingRow + 4, column = pricesColumnStart, colspan = 3)
     app.stopTab()
     

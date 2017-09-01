@@ -8,6 +8,7 @@ from datetime import datetime
 from datetime import timedelta
 from WeekOfDate import WeekOfDate
 from Settings import Settings
+from Purchase_History import Purchase_History
 
 app = gui("Meal Plan Configuration")
 dateFormat = "%Y-%m-%d"
@@ -111,6 +112,23 @@ def press(btn):
         pressSettingsUpdate()
     elif btn.startswith("None"):
         pressNoneMeal(btn)
+    elif btn == "Enter":
+        pressPurchaseEnter()
+
+def pressPurchaseEnter():
+    ingredientName = app.getOptionBox(ingredientSelectionPriceLabel)
+    amount = app.getEntry(amountPurchasedLabel)
+    units = app.getOptionBox(amountPurchasedUnitsLabel)
+    purchasePrice = app.getEntry(amountPaidLabel)
+    store = app.getOptionBox(storeSelectionLabel)
+    
+    newPurchase = Purchase_History.createNewPurchase(ingredientName, amount, units, purchasePrice, store)
+    newPurchase.add()
+    print(newPurchase)
+    
+    app.clearEntry(amountPurchasedLabel)
+    app.clearEntry(amountPaidLabel)
+    app.setFocus(amountPurchasedLabel)
         
 def pressIngredientAdd():
     ingredientName = app.getEntry(newIngredientLabel)

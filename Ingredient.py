@@ -8,9 +8,12 @@ class Ingredient:
 
     ingredientIdColumn = "Ingredient_ID"
     ingredientNameColumn = "Ingredient_Name"
+    amountOnHandColumn = "Amount_On_Hand"
 
-    def __init__(self, ingredientName):
+    def __init__(self, ingredientName, averagePricePerUnit = 1.00):
         self.ingredientName = ingredientName     
+        self.averagePricePerUnit = averagePricePerUnit
+        #self.amountOnHand = amountOnHand
 
     def getRecipeIngredients(recipeIdNumber): # Method for returning ingredient information from the database
         ingredients = []
