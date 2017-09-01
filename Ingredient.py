@@ -13,8 +13,8 @@ class Ingredient:
         self.ingredientName = ingredientName     
 
     def getRecipeIngredients(recipeIdNumber): # Method for returning ingredient information from the database
-        ingredients = {}
-        
+        ingredients = []
+
         connection = DataConnection()        
         query = """SELECT {6}.{0}, {4}.{1}, {9}.{2}
                     FROM {3} JOIN {4} ON {3}.{5} = {4}.{5}
@@ -38,9 +38,9 @@ class Ingredient:
 
         if ingredientsResultList:
             for item in ingredientsResultList:
-                ingredients += {'name': item[0], 'amount': item[1], 'units': item[2]}
-            return ingredients
-        else: return None
+                ingredients.append({'name': item[0], 'amount': item[1], 'units': item[2]})
+        
+        return ingredients
 
     def add(self):
         connection = DataConnection()

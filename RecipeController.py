@@ -28,6 +28,7 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
     isAdd = (actionType == "add")
     isUpdate = (actionType == "update")
     isSide = (labelName.__contains__("side"))
+    isUnit = (labelName.__contains__("Unit"))
 
     if nameColumn != WeekOfDate.dateNameColumn:
         optionsList = listOptions(nameColumn, tableName, True)
@@ -40,7 +41,7 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
     if isUpdate:
         app.changeOptionBox(labelName, optionsList)
     elif isAdd:        
-        if isSide:
+        if isSide or isUnit:
             app.addOptionBox(labelName, optionsList, row, column)
         else:
             app.addLabelOptionBox(labelName, optionsList, row, column)
@@ -143,7 +144,9 @@ def pressRecipeAdd():
     if recipeName != "" and isNewRecipe:
         recipeType = app.getOptionBox(recipeTypeLabel)
         cookbookType = app.getOptionBox(recipeCookbookTypeLabel)
-        description = app.getTextArea(recipeTextBoxLabel)
+        description = app.getTextArea(recipeTextBoxLabel)        
+        if description == "": description = None
+        
         addRecipe(recipeName, recipeType, cookbookType, description)
         
         if actionType == "update":

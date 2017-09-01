@@ -1,6 +1,6 @@
 from DataConnection import DataConnection
 import Utilities
-from Ingredient import Ingredient
+import Ingredient
 from Amount_Units import Amount_Units
 
 class Recipe:
@@ -72,10 +72,10 @@ class Recipe:
             description = None
         
         if recipeId:  
-            ingredients = Ingredient.getRecipeIngredients(recipeId)
+            ingredients = Ingredient.Ingredient.getRecipeIngredients(recipeId)
             return Recipe(recipeId, recipeInfo, recipeType, cookbookType, ingredients, description)
         elif recipeName:
-            ingredients = Ingredient.getRecipeIngredients(recipeInfo)
+            ingredients = Ingredient.Ingredient.getRecipeIngredients(recipeInfo)
             return Recipe(recipeInfo, recipeName, recipeType, cookbookType, ingredients, description)
 
     def add(self):
@@ -86,11 +86,11 @@ class Recipe:
         connection.updateData(recipeQuery, recipeInsertValues)
         
         for ingredient in self.ingredients:
-            ingredientId = Utilities.getKnownInfo(ingredient['name'], Ingredient.ingredientIdColumn, Ingredient.ingredientNameColumn, Ingredient.ingredientTable, False)
+            ingredientId = Utilities.getKnownInfo(ingredient['name'], Ingredient.Ingredient.ingredientIdColumn, Ingredient.Ingredient.ingredientNameColumn, Ingredient.Ingredient.ingredientTable, False)
             amount = ingredient['amount']
             amountUnitId = Utilities.getKnownInfo(ingredient['units'], Amount_Units.unitIdColumn, Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, False)
             
-            bridgeQuery = "INSERT INTO {} ({}, {}, {}, {}) VALUES (%s, %s, %s, %s); ".format(Recipe.recipeElementTable, Recipe.recipeIdColumn, Ingredient.ingredientIdColumn, Recipe.amountNameColumn, Amount_Units.unitIdColumn)
+            bridgeQuery = "INSERT INTO {} ({}, {}, {}, {}) VALUES (%s, %s, %s, %s); ".format(Recipe.recipeElementTable, Recipe.recipeIdColumn, Ingredient.Ingredient.ingredientIdColumn, Recipe.amountNameColumn, Amount_Units.unitIdColumn)
             bridgeInsertValues = (self.recipeId, ingredientId, amount, amountUnitId)        
             connection.updateData(bridgeQuery, bridgeInsertValues)
         
@@ -106,10 +106,13 @@ class Recipe:
         message += "Recipe type: " + self.recipeType + newLine
         message += "Cookbook type: " + self.cookbookType + newLine
         
-        message += "Ingredients: " + newLine        
-        for ingredient in self.ingredients:
-            message += "{} {} {} {} {}".format(tab, ingredient['amount'], ingredient['units'], ingredient['name'], newLine)
-            
-        message += "Description: " + self.description
+        if self.ingredients:
+            message += "Ingredients: " + newLine
+            for ingredient in self.ingredients:
+                message += "{} {} {} {} {}".format(tab, ingredient['amount'], ingredient['units'], ingredient['name'], newLine)
+        else:
+            message += "Ingredients: None" + newLine
+        
+        message += "Description: " + str(self.description)
 
         return message
