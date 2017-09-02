@@ -35,6 +35,7 @@ recipeCookbookTypeLabelUpdate = "Cookbook Type: "
 recipeTextBoxLabelUpdate = "updateRecipeTextBoxLabel"
 amountUnitsLabelUpdate = "Update Unit "
 amountEntryLabelUpdate = "Amount  "
+ingredientEntryLabel = "IngredientEntryLabel"
 
 addRecipesTab = "Add Recipe"
 assignRecipesTab = "Assign Recipes"
@@ -110,13 +111,13 @@ def configureGui(app, handleOptionBox, press):
     app.addHorizontalSeparator(row = headingRow + 2, colspan = 4)
     handleOptionBox(recipeTypeLabelUpdate, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isNotCookbook), row = headingRow + 3, column = updateRecipeColumnStart)    
     handleOptionBox(recipeCookbookTypeLabelUpdate, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isCookbook), row = headingRow + 3, column = updateRecipeColumnStart + 1)
-    app.addLabel("Ingredient(s)", "Ingredient(s)", row = headingRow + 4, column = updateRecipeColumnStart, colspan = 1)
-    app.addEntry("IngredientEntryLabel", row = headingRow + 5, column = updateRecipeColumnStart, colspan = 2)
-    app.addLabelEntry(amountEntryLabelUpdate, row = headingRow + 5, column = updateRecipeColumnStart + 2)
-    handleOptionBox(amountUnitsLabelUpdate, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, row = headingRow + 5, column = updateRecipeColumnStart + 3)
-    app.addScrolledTextArea(recipeTextBoxLabelUpdate, row = headingRow + 7, colspan = 4)
-    app.addNamedButton("Update", "Recipe Update", press, row = headingRow + 8, column = updateRecipeColumnStart + 1)
-    app.addButton("Delete", press, row = headingRow + 8, column = updateRecipeColumnStart + 2)
+    app.addScrolledTextArea(recipeTextBoxLabelUpdate, row = headingRow + 4, colspan = 4)
+    app.addLabel("Ingredient(s)", "Ingredient(s)", row = headingRow + 7, column = updateRecipeColumnStart, colspan = 1)
+    app.addEntry(ingredientEntryLabel, row = headingRow + 8, column = updateRecipeColumnStart, colspan = 2)
+    app.addLabelEntry(amountEntryLabelUpdate, row = headingRow + 8, column = updateRecipeColumnStart + 2)
+    handleOptionBox(amountUnitsLabelUpdate, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, row = headingRow + 8, column = updateRecipeColumnStart + 3)
+    app.addNamedButton("Update", "Recipe Update", press, row = headingRow + 9, column = updateRecipeColumnStart + 1)
+    app.addButton("Delete", press, row = headingRow + 9, column = updateRecipeColumnStart + 2)
     app.stopTab()
 
     app.startTab(assignRecipesTab)

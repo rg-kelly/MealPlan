@@ -64,12 +64,10 @@ class Recipe:
         try:
             cookbookType = Utilities.getKnownInfo(Utilities.getKnownInfo(known, Recipe.cookbookTypeIdColumn, where, Recipe.recipeTable, whereIsId), Recipe.typeNameColumn, Recipe.typeIdColumn, Recipe.typeTable, True)
         except:
-            cookbookType = None
+            cookbookType = "None"
         
-        try:
-            description = Utilities.getKnownInfo(known, Recipe.recipeDescriptionColumn, where, Recipe.recipeTable, whereIsId)
-        except:
-            description = None
+        description = Utilities.getKnownInfo(known, Recipe.recipeDescriptionColumn, where, Recipe.recipeTable, whereIsId)
+        if description == None: description = ""
         
         if recipeId:  
             ingredients = Ingredient.Ingredient.getRecipeIngredients(recipeId)
