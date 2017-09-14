@@ -114,48 +114,8 @@ def press(btn):
     elif btn.startswith("None"):
         pressNoneMeal(btn)
     elif btn == "Enter":
-        pressPurchaseEnter()
-    elif btn == "Update Go":
-        pressUpdateGo()
-    elif btn == "Recipe Update":
-        pressRecipeUpdate()
-        
-def pressUpdateGo():
-    recipeName = app.getOptionBox(updateRecipeLabel)
-    recipe = Recipe.getExistingRecipe(recipeId=False, recipeName=recipeName)
-    
-    app.clearAllEntries()
-    app.setOptionBox(updateRecipeLabel, recipe.recipeName)
-    app.setOptionBox(recipeCookbookTypeLabelUpdate, recipe.cookbookType)
-    app.setOptionBox(recipeTypeLabelUpdate, recipe.recipeType)
-    app.clearTextArea(recipeTextBoxLabelUpdate)
-    app.setTextArea(recipeTextBoxLabelUpdate, recipe.description)
-    
-    count = 0
-    updateRecipeColumnStart = 0
-    
-    if recipe.ingredients:
-        for ingredient in recipe.ingredients:
-            if count == 0:
-                app.setEntry(ingredientEntryLabel, ingredient['name'])
-                app.setEntry(amountEntryLabelUpdate, ingredient['amount'])
-                app.setOptionBox(amountUnitsLabelUpdate, ingredient['units'])
-            else:
-                app.addEntry(ingredientEntryLabel + str(count), row = headingRow + 8 + count, column = updateRecipeColumnStart)
-                app.addEntry(amountEntryLabelUpdate + str(count), row = headingRow + 8 + count, column = updateRecipeColumnStart + 2)
-                handleOptionBox(amountUnitsLabelUpdate + str(count), "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, row = headingRow + 8 + count, column = updateRecipeColumnStart + 3)
-                app.setEntry(ingredientEntryLabel + str(count), ingredient['name'])
-                app.setEntry(amountEntryLabelUpdate + str(count), ingredient['amount'])
-                app.setOptionBox(amountUnitsLabelUpdate + str(count), ingredient['units'])
-                
-            count += 1
-    else:
-        count = 1
+        pressPurchaseEnter()  
 
-    app.addNamedButton("Update", "Recipe Update", press, row = headingRow + 15 + count, column = updateRecipeColumnStart + 1)
-    app.addButton("Delete", press, row = headingRow + 15 + count, column = updateRecipeColumnStart + 2)    
-    app.stopTab()
-    
 def pressPurchaseEnter():
     ingredientName = app.getOptionBox(ingredientSelectionPriceLabel)
     amount = app.getEntry(amountPurchasedLabel)
