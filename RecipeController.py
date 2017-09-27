@@ -18,6 +18,7 @@ newOption = "- Select or Add New -"
 ingredientsList = []
 submitButtonSuffix = "__submitButton"
 updateButtonSuffix = "__updateButton"
+ingredientRowSymbol = "@"
 
 import ctypes
 ctypes.windll.user32.ShowWindow( ctypes.windll.kernel32.GetConsoleWindow(), 6 )
@@ -112,8 +113,8 @@ def press(btn):
     print(btn)
     if btn == "Cancel":
         app.stop()
-    elif btn.startswith("Add") and btn.__contains__("Ingredient"):
-        pressIngredientAdd()
+    elif btn.startswith(ingredientAddButton):
+        pressIngredientAdd(btn)
     elif btn == "Submit":
         pressRecipeAssign()
     elif btn == "Go":
@@ -128,11 +129,54 @@ def press(btn):
         pressRecipeGo()
     elif btn.__contains__(" Recipe: "):
         if btn.endswith(submitButtonSuffix):
-            pressRecipeSubmit(btn, submitButtonSuffix)
+            destroySubwindow(btn, submitButtonSuffix)
         elif btn.endswith(updateButtonSuffix):
-            pressRecipeSubmit(btn, updateButtonSuffix)
+            destroySubwindow(btn, updateButtonSuffix)
+    elif btn == addIngredientsButton:
+        pressAddIngredients()
+    elif btn.startswith(ingredientsDoneButton):
+        destroySubwindow(btn, ingredientsDoneButton)
 
-def pressRecipeSubmit(buttonId, suffixToReplace):
+def getNumberedAmountLabel(row):
+    numberedAmountLabel = str(row) + ". "
+    return numberedAmountLabel
+
+def pressAddIngredients():
+    recipeName = getEntryLogic(recipeSelectionLabel, newRecipeEntryLabel, defaultEntry=app.getOptionBox(recipeSelectionLabel), validationFunction=validateRecipeName, errorMessage="", notifyIfManual=False)
+    isNewRecipe = (getKnownInfo(recipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)
+    uniqueIngredientsWindowTitle = ingredientsWindowTitle + uniqueLabel
+    
+    app.startSubWindow(uniqueIngredientsWindowTitle, ingredientsWindowTitle, modal=True)
+    app.addLabel(uniqueIngredientsWindowTitle, ingredientsWindowTitle + " for '" + recipeName + "'", row = headingRow, column = 0, colspan = 4)
+    
+    global ingredientStartRow
+    ingredientStartRow = headingRow + 1
+    if not isNewRecipe:
+        recipe = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False) 
+
+        if recipe.ingredients:
+            for ingredient in recipe.ingredients:
+                amountLabel = getNumberedAmountLabel(ingredientStartRow)
+                unitsLabel = amountUnitsLabel + uniqueLabel + str(ingredientStartRow)
+                ingredientNameLabel = ingredientEntryLabel + uniqueLabel + str(ingredientStartRow)
+                
+                addIngredientEntries(amountLabel, unitsLabel, ingredientNameLabel, startRow=ingredientStartRow)
+                app.setEntry(amountLabel, ingredient['amount'])
+                app.setOptionBox(unitsLabel, ingredient['units'])
+                app.setEntry(ingredientNameLabel, ingredient['name'])
+                
+                ingredientStartRow += 1
+            app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow - len(recipe.ingredients), column=3)
+        else:
+            addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow)
+            app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
+    elif isNewRecipe:
+        addIngredientEntries(amountLabel=amountEntryLabel, unitsLabel=amountUnitsLabel + uniqueLabel, ingredientNameLabel=ingredientEntryLabel + uniqueLabel, startRow=ingredientStartRow)
+    
+    app.addNamedButton(ingredientsDoneButton, ingredientsDoneButton + uniqueIngredientsWindowTitle, press, row = ingredientStartRow + 1, column=0, colspan=4)
+    app.showSubWindow(uniqueIngredientsWindowTitle)
+
+def destroySubwindow(buttonId, suffixToReplace):
     windowTitle = buttonId.replace(suffixToReplace, "")
     app.destroySubWindow(windowTitle)
 
@@ -151,7 +195,15 @@ def pressPurchaseEnter():
     app.clearEntry(amountPaidLabel)
     app.setFocus(amountPurchasedLabel)
         
-def pressIngredientAdd():
+def pressIngredientAdd(btn): #need to catch when this button has been pressed multiple times for same window...
+    if btn.__contains__(ingredientRowSymbol):
+        currentRow = int(btn.split(ingredientRowSymbol)[1])
+        if currentRow == ingredientStartRow: currentRow += 1
+    
+    app.removeButton(ingredientsDoneButtonUnique)
+    addIngredientEntries(amountLabel=getNumberedAmountLabel(currentRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(currentRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(currentRow), startRow=currentRow)
+    app.addNamedButton(ingredientsDoneButton, ingredientsDoneButtonUnique, press, row = currentRow + 1, column=0, colspan=4)
+    
     #newIngredientLabel = newIngredientLabel + uniqueLabel
     #amountEntryLabel = amountEntryLabel + uniqueLabel
     #amountUnitsLabel = amountUnitsLabel + uniqueLabel
@@ -174,11 +226,8 @@ def pressIngredientAdd():
         #elif not isNewIngredient:
             #message = "Ingredient '{}' already exists.".format(ingredientName)
             #app.warn(message)
-        
-    #app.clearEntry(newIngredientLabel)
-    #app.clearEntry(amountEntryLabel)
-    #app.setFocus(newIngredientLabel)
-    print("debug: add ingredient")
+
+    #app.setFocus(amountLabel)
     
 def pressRecipeAdd():
     recipeName = app.getEntry(newRecipeLabel)
@@ -242,13 +291,22 @@ def pressSettingsUpdate():
 def validateRecipeName(recipeName):
     return True   
 
+def addIngredientEntries(amountLabel, unitsLabel, ingredientNameLabel, startRow):
+    app.addLabelEntry(amountLabel, row=startRow, column=0)
+    handleOptionBox(unitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, startRow, 1)
+    app.addEntry(ingredientNameLabel, row = startRow, column = 2)    
+
 def pressRecipeGo():
     recipeName, isManualEntry = getEntryLogic(recipeSelectionLabel, newRecipeEntryLabel, defaultEntry=app.getOptionBox(recipeSelectionLabel), validationFunction=validateRecipeName, errorMessage="", notifyIfManual=True)
     isNewRecipe = (getKnownInfo(recipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)
     actionType = getActionType(tabType=addRecipesTab)
+    
     global uniqueLabel
     uniqueLabel = str(random.random())
     
+    global ingredientsDoneButtonUnique
+    ingredientsDoneButtonUnique = ingredientsDoneButton + ingredientsWindowTitle + uniqueLabel
+
     if isNewRecipe:
         windowTitlePrefix = "Add"
     else:
@@ -269,34 +327,15 @@ def pressRecipeGo():
     
     if not isNewRecipe:
         ingredientStartRow = headingRow + 4
-        
-        recipe = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False)
+        recipe = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False) 
         
         app.addHorizontalSeparator(row = headingRow+2, column = 0, colspan = 4)
-        app.addLabel("Ingrendient(s)" + uniqueLabel, "Ingrendient(s)", row = headingRow+3, column = 0, colspan = 4)
-        
-        if recipe.ingredients:
-            for ingredient in recipe.ingredients:
-                print(ingredient)
-                
-                app.addLabelEntry(str(ingredientStartRow - 3) + ". ", row=ingredientStartRow, column=0)
-                handleOptionBox(amountUnitsLabel + uniqueLabel + str(ingredientStartRow), "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, ingredientStartRow, 1)
-                app.addEntry(ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), row = ingredientStartRow, column = 2)
-                #app.addNamedButton("Add", ingredientAddButton + uniqueLabel + str(ingredientStartRow), press, row=ingredientStartRow, column=3)
-                
-                ingredientStartRow += 1
-        else:
-            app.addLabelEntry(str(ingredientStartRow - 3) + ". ", row=ingredientStartRow, column=0)
-            handleOptionBox(amountUnitsLabel + uniqueLabel + str(ingredientStartRow), "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, ingredientStartRow, 1)
-            app.addEntry(ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), row = ingredientStartRow, column = 2)
-            app.addNamedButton("Add", ingredientAddButton + uniqueLabel + str(ingredientStartRow), press, row=ingredientStartRow, column=3)            
-        
+        app.addButton(addIngredientsButton, press, row = headingRow + 3, column = 0, colspan=4)
         app.addHorizontalSeparator(row = ingredientStartRow + 1, column = 0, colspan = 4)        
         
         app.addLabel("Instructions:" + uniqueLabel, "Instructions:", row = ingredientStartRow + 2, column = 0)
         app.addScrolledTextArea(recipeTextBoxLabel + uniqueLabel, row = ingredientStartRow + 2, column = 0, colspan = 4)
-        if isNewRecipe: app.addNamedButton("Submit", windowTitleUnique + submitButtonSuffix, press, row=ingredientStartRow + 3, column=0, colspan=4)
-        else: app.addNamedButton("Update", windowTitleUnique + updateButtonSuffix, press, row=ingredientStartRow + 3, column=0, colspan=4)
+        app.addNamedButton("Update", windowTitleUnique + updateButtonSuffix, press, row=ingredientStartRow + 3, column=0, colspan=4)
         
         app.setOptionBox(recipeTypeLabel + uniqueLabel, recipe.recipeType)
         app.setOptionBox(recipeCookbookTypeLabel + uniqueLabel, recipe.cookbookType)
@@ -306,11 +345,7 @@ def pressRecipeGo():
         app.setOptionBox(recipeCookbookTypeLabel + uniqueLabel, "None")
         
         app.addHorizontalSeparator(row = headingRow+2, column = 0, colspan = 4)
-        app.addLabel("Ingrendient(s)" + uniqueLabel, "Ingrendient(s)", row = headingRow+3, column = 0, colspan = 4)
-        app.addLabelEntry(amountEntryLabel, row=headingRow+4, column=0)
-        handleOptionBox(amountUnitsLabel + uniqueLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, headingRow+4, 1)
-        app.addEntry(ingredientEntryLabel + uniqueLabel, row = headingRow+4, column = 2)
-        app.addNamedButton("Add", ingredientAddButton + uniqueLabel, press, row=headingRow+4, column=3)
+        app.addButton(addIngredientsButton, press, row = headingRow + 3, column = 0, colspan=4)
         app.addHorizontalSeparator(row = headingRow+5, column = 0, colspan = 4)        
     
         app.addLabel("Instructions:" + uniqueLabel, "Instructions:", row = headingRow+6, column = 0)

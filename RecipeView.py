@@ -35,6 +35,9 @@ recipeSelectionLabel = "Recipe: "
 newRecipeEntryLabel = "New: "
 recipeGoAgainButton = "Recipe Go Again"
 ingredientAddButton = "Add Button Ingredient"
+addIngredientsButton = "Configure Ingredients"
+ingredientsWindowTitle = addIngredientsButton
+ingredientsDoneButton = "Done"
 
 addRecipesTab = "Recipes"
 assignRecipesTab = "Meal Plan"
@@ -53,6 +56,8 @@ submitRow = typeHeadingRow + 10
 dateSelectionColumn = 0
 newDateEntryColumn = dateSelectionColumn + 1
 goButtonColumn = newDateEntryColumn + 1
+
+ingredientStartRow = headingRow + 1
 
 ### Settings values from DB ###
 dinnerKey = 'dinner'
