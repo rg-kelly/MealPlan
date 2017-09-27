@@ -31,12 +31,18 @@ amountPurchasedLabel = "Amount: "
 amountPurchasedUnitsLabel = "Unit"
 updateRecipeLabel = "Recipe Selection"
 ingredientEntryLabel = "IngredientEntryLabel"
+recipeSelectionLabel = "Recipe: "
+newRecipeEntryLabel = "New: "
+recipeGoAgainButton = "Recipe Go Again"
+ingredientAddButton = "Add Button Ingredient"
 
-addRecipesTab = "Add Recipe"
-assignRecipesTab = "Assign Recipes"
+addRecipesTab = "Recipes"
+assignRecipesTab = "Meal Plan"
 enterPricesTab = "Enter Prices"
-updateRecipesTab = "Update Recipe"
 
+recipeSelectionColumn = 0
+newRecipeColumn = recipeSelectionColumn + 1
+goButtonColumn = newRecipeColumn + 1
 headingRow = 0
 defaultRow = 0
 defaultColumn = 0
@@ -88,14 +94,10 @@ def configureGui(app, handleOptionBox, press):
     app.stopTab()
     
     app.startTab(addRecipesTab)
-    addItem(recipeNameMaxLength, "Recipe", app, press, bottomButton=True)
-    handleOptionBox(recipeTypeLabel, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isNotCookbook), 1, 2)    
-    handleOptionBox(recipeCookbookTypeLabel, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isCookbook), 1, 3)
-    app.setOptionBox(recipeCookbookTypeLabel, "None")
-    addItem(recipeNameMaxLength, "Ingredient", app, press, rowStart=2, columnStart=1, bottomButton=False, isFirstAdd=False)
-    app.addLabelEntry(amountEntryLabel, row=3, column=2)
-    handleOptionBox(amountUnitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, 3, 3)
-    app.addScrolledTextArea(recipeTextBoxLabel, row = 5, colspan = 4)
+    app.addLabel(addRecipesTab, addRecipesTab, row = headingRow, column = 0, colspan = 4)
+    handleOptionBox(recipeSelectionLabel, "add", Recipe.recipeNameColumn, Recipe.recipeTable, dateRow, recipeSelectionColumn)
+    app.addLabelEntry(newRecipeEntryLabel, row = dateRow, column = newRecipeColumn)
+    app.addNamedButton( "Go", recipeGoAgainButton, press, row = dateRow, column = goButtonColumn)
     app.stopTab()
 
     app.startTab(assignRecipesTab)
@@ -105,4 +107,4 @@ def configureGui(app, handleOptionBox, press):
     app.setEntryDefault(newDateEntryLabel, "yyyy-mm-dd")
     app.addButton("Go", press, row = dateRow, column = goButtonColumn)
     
-    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", assignRecipesTab)
+    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", addRecipesTab)
