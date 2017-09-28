@@ -19,6 +19,7 @@ ingredientsList = []
 submitButtonSuffix = "__submitButton"
 updateButtonSuffix = "__updateButton"
 ingredientRowSymbol = "@"
+addToCurrentRow = 0
 
 import ctypes
 ctypes.windll.user32.ShowWindow( ctypes.windll.kernel32.GetConsoleWindow(), 6 )
@@ -136,6 +137,11 @@ def press(btn):
         pressAddIngredients()
     elif btn.startswith(ingredientsDoneButton):
         destroySubwindow(btn, ingredientsDoneButton)
+        pressIngredientsDone()
+
+def pressIngredientsDone():
+    global addToCurrentRow
+    addToCurrentRow = 0
 
 def getNumberedAmountLabel(row):
     numberedAmountLabel = str(row) + ". "
@@ -149,7 +155,6 @@ def pressAddIngredients():
     app.startSubWindow(uniqueIngredientsWindowTitle, ingredientsWindowTitle, modal=True)
     app.addLabel(uniqueIngredientsWindowTitle, ingredientsWindowTitle + " for '" + recipeName + "'", row = headingRow, column = 0, colspan = 4)
     
-    global ingredientStartRow
     ingredientStartRow = headingRow + 1
     if not isNewRecipe:
         recipe = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False) 
@@ -164,14 +169,15 @@ def pressAddIngredients():
                 app.setEntry(amountLabel, ingredient['amount'])
                 app.setOptionBox(unitsLabel, ingredient['units'])
                 app.setEntry(ingredientNameLabel, ingredient['name'])
-                
+
                 ingredientStartRow += 1
             app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow - len(recipe.ingredients), column=3)
         else:
             addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow)
             app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
     elif isNewRecipe:
-        addIngredientEntries(amountLabel=amountEntryLabel, unitsLabel=amountUnitsLabel + uniqueLabel, ingredientNameLabel=ingredientEntryLabel + uniqueLabel, startRow=ingredientStartRow)
+        addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel, ingredientNameLabel=ingredientEntryLabel + uniqueLabel, startRow=ingredientStartRow)
+        app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
     
     app.addNamedButton(ingredientsDoneButton, ingredientsDoneButton + uniqueIngredientsWindowTitle, press, row = ingredientStartRow + 1, column=0, colspan=4)
     app.showSubWindow(uniqueIngredientsWindowTitle)
@@ -195,15 +201,21 @@ def pressPurchaseEnter():
     app.clearEntry(amountPaidLabel)
     app.setFocus(amountPurchasedLabel)
         
-def pressIngredientAdd(btn): #need to catch when this button has been pressed multiple times for same window...
+def pressIngredientAdd(btn):
+    ingredientWindowStartRow = 1
+
     if btn.__contains__(ingredientRowSymbol):
         currentRow = int(btn.split(ingredientRowSymbol)[1])
-        if currentRow == ingredientStartRow: currentRow += 1
-    
+        if currentRow == ingredientWindowStartRow: currentRow += 1
+        currentRow += addToCurrentRow
+        
     app.removeButton(ingredientsDoneButtonUnique)
     addIngredientEntries(amountLabel=getNumberedAmountLabel(currentRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(currentRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(currentRow), startRow=currentRow)
     app.addNamedButton(ingredientsDoneButton, ingredientsDoneButtonUnique, press, row = currentRow + 1, column=0, colspan=4)
     
+    global addToCurrentRow
+    addToCurrentRow += 1
+
     #newIngredientLabel = newIngredientLabel + uniqueLabel
     #amountEntryLabel = amountEntryLabel + uniqueLabel
     #amountUnitsLabel = amountUnitsLabel + uniqueLabel
