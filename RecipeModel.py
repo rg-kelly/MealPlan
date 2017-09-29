@@ -83,20 +83,57 @@ class Recipe:
         recipeInsertValues = (self.recipeId, self.recipeName, Utilities.getKnownInfo(self.recipeType, self.typeIdColumn, self.typeNameColumn, self.typeTable, False), Utilities.getKnownInfo(self.cookbookType, self.typeIdColumn, self.typeNameColumn, self.typeTable, False), self.description)
         connection.updateData(recipeQuery, recipeInsertValues)
         
+        self.insertIngredients(connection, returnQueryOnly=False)
+        #for ingredient in self.ingredients:
+            #ingredientId = Utilities.getKnownInfo(ingredient['name'], Ingredient.Ingredient.ingredientIdColumn, Ingredient.Ingredient.ingredientNameColumn, Ingredient.Ingredient.ingredientTable, False)
+            #amount = ingredient['amount']
+            #amountUnitId = Utilities.getKnownInfo(ingredient['units'], Amount_Units.unitIdColumn, Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, False)
+            
+            #bridgeQuery = "INSERT INTO {} ({}, {}, {}, {}) VALUES (%s, %s, %s, %s); ".format(Recipe.recipeElementTable, Recipe.recipeIdColumn, Ingredient.Ingredient.ingredientIdColumn, Recipe.amountNameColumn, Amount_Units.unitIdColumn)
+            #bridgeInsertValues = (self.recipeId, ingredientId, amount, amountUnitId)        
+            #connection.updateData(bridgeQuery, bridgeInsertValues)
+        
+        connection.closeConnection()
+        print("Successfully added " + "'" + self.recipeName + "' " + "recipe")
+        
+    def update(self, newRecipeName, newRecipeType, newCookbookType, newIngredientsList, newDescription, updateIngredients = True):
+        queryList = []
+        if self.recipeName != newRecipeName:
+            self.recipeName = newRecipeName
+            queryList.append("UPDATE {} SET {} = {} WHERE {} = {};".format(Recipe.recipeTable, Recipe.recipeNameColumn, self.recipeName, Recipe.recipeIdColumn, self.recipeId))
+        if self.recipeType != newRecipeType:
+            self.recipeType = newRecipeType
+            queryList.append("UPDATE {} SET {} = {} WHERE {} = {};".format(Recipe.recipeTable, Recipe.typeIdColumn, Utilities.getKnownInfo(self.recipeType, Recipe.typeIdColumn, Recipe.typeNameColumn, False), Recipe.recipeIdColumn, self.recipeId))
+        if self.cookbookType != newCookbookType:
+            self.cookbookType = newCookbookType
+            queryList.append("UPDATE {} SET {} = {} WHERE {} = {};".format(Recipe.recipeTable, Recipe.cookbookTypeIdColumn, Utilities.getKnownInfo(self.cookbookType, Recipe.typeIdColumn, Recipe.typeNameColumn, False), Recipe.recipeIdColumn, self.recipeId))
+        if self.description != newDescription:
+            self.description = newDescription
+            queryList.append("UPDATE {} SET {} = {} WHERE {} = {};".format(Recipe.recipeTable, Recipe.recipeDescriptionColumn, self.description, Recipe.recipeIdColumn, self.recipeId))
+        if updateIngredients:
+            self.ingredients = newIngredientsList
+            queryList.append("DELETE FROM {} WHERE {} = {};".format(Recipe.recipeElementTable, Recipe.recipeIdColumn, self.recipeId))
+            queryList.append(self.insertIngredients(None, returnQueryOnly=True)) # need to return tuple as well and figure out how to return it just as string and not string in list of lists..
+    
+        for query in queryList:
+            #connection = DataConnection()
+            #connection.updateData(query)
+            #connection.closeConnection()
+            print(query)
+            
+    def insertIngredients(self, connectionInstance, returnQueryOnly = False):
+        bridgeQueryList = []
         for ingredient in self.ingredients:
             ingredientId = Utilities.getKnownInfo(ingredient['name'], Ingredient.Ingredient.ingredientIdColumn, Ingredient.Ingredient.ingredientNameColumn, Ingredient.Ingredient.ingredientTable, False)
             amount = ingredient['amount']
             amountUnitId = Utilities.getKnownInfo(ingredient['units'], Amount_Units.unitIdColumn, Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, False)
             
             bridgeQuery = "INSERT INTO {} ({}, {}, {}, {}) VALUES (%s, %s, %s, %s); ".format(Recipe.recipeElementTable, Recipe.recipeIdColumn, Ingredient.Ingredient.ingredientIdColumn, Recipe.amountNameColumn, Amount_Units.unitIdColumn)
-            bridgeInsertValues = (self.recipeId, ingredientId, amount, amountUnitId)        
-            connection.updateData(bridgeQuery, bridgeInsertValues)
-        
-        connection.closeConnection()
-        print("Successfully added " + "'" + self.recipeName + "' " + "recipe")
-        
-    def update(self):
-        return True
+            bridgeInsertValues = (self.recipeId, ingredientId, amount, amountUnitId)
+            if not returnQueryOnly: connectionInstance.updateData(bridgeQuery, bridgeInsertValues)
+            else: bridgeQueryList.append(bridgeQuery)
+            
+        if returnQueryOnly: return bridgeQueryList
 
     def __str__(self):
         newLine = "\n"

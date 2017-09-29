@@ -35,8 +35,8 @@ recipeSelectionLabel = "Recipe: "
 newRecipeEntryLabel = "New: "
 recipeGoAgainButton = "Recipe Go Again"
 ingredientAddButton = "Add Button Ingredient"
-addIngredientsButton = "Configure Ingredients"
-ingredientsWindowTitle = addIngredientsButton
+configureIngredientsButton = "Configure Ingredients"
+ingredientsWindowTitle = configureIngredientsButton
 ingredientsDoneButton = "Done"
 
 addRecipesTab = "Recipes"

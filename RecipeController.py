@@ -12,6 +12,7 @@ from Purchase_History import Purchase_History
 import random
 
 app = gui("Meal Plan Configuration")
+app.setLogLevel("ERROR")
 dateFormat = "%Y-%m-%d"
 timeFormat = "%I:%M"
 newOption = "- Select or Add New -"
@@ -29,6 +30,12 @@ def addRecipe(recipeName, recipeType, cookbookType, description):
     recipe.add()
     
     app.infoBox(recipeName, "Successfully added new recipe!\n\n{}".format(str(recipe)))
+    
+def updateRecipe(recipeName, recipeType, cookbookType, description):
+    recipe = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False)
+    recipe.update(recipeName, recipeType, cookbookType, ingredientsList, description, updateIngredients=ingredientsHaveChanged)
+    
+    app.infoBox(recipeName, "Successfully updated recipe!\n\n{}".format(str(recipe)))
 
 def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultRow, column = defaultColumn):
     isAdd = (actionType == "add")
@@ -111,7 +118,7 @@ def getEntryLogic(selectionLabel, entryLabel, defaultEntry, validationFunction, 
         raise Exception(message)
 
 def press(btn):
-    print(btn)
+    #print(btn)
     if btn == "Cancel":
         app.stop()
     elif btn.startswith(ingredientAddButton):
@@ -129,25 +136,62 @@ def press(btn):
     elif btn == recipeGoAgainButton:
         pressRecipeGo()
     elif btn.__contains__(" Recipe: "):
+        pressRecipeSubmit()
         if btn.endswith(submitButtonSuffix):
             destroySubwindow(btn, submitButtonSuffix)
         elif btn.endswith(updateButtonSuffix):
             destroySubwindow(btn, updateButtonSuffix)
-    elif btn == addIngredientsButton:
-        pressAddIngredients()
+    elif btn == configureIngredientsButton:
+        pressConfigureIngredients()
     elif btn.startswith(ingredientsDoneButton):
-        destroySubwindow(btn, ingredientsDoneButton)
         pressIngredientsDone()
+        destroySubwindow(btn, ingredientsDoneButton)
 
 def pressIngredientsDone():
     global addToCurrentRow
     addToCurrentRow = 0
+    done = False
+    count = 1
+
+    while not done:
+        amountLabel = getNumberedAmountLabel(count)
+        unitsLabel = amountUnitsLabel + uniqueLabel + str(count)
+        ingredientNameLabel = ingredientEntryLabel + uniqueLabel + str(count)
+        
+        try:
+            amount = app.getEntry(amountLabel)
+            units = app.getOptionBox(unitsLabel)
+            ingredientName = app.getEntry(ingredientNameLabel)
+           
+        except:
+            done = True
+
+        if not done:
+            isNewIngredient = (getKnownInfo(ingredientName, Ingredient.Ingredient.ingredientIdColumn, Ingredient.Ingredient.ingredientNameColumn, Ingredient.Ingredient.ingredientTable, False) == None)
+            
+            if ingredientName != "":  
+                ingredientsList.append({'amount': amount, 'name': ingredientName, 'units': units})
+                
+                if isNewIngredient:
+                    ingredient = Ingredient.Ingredient(ingredientName)
+                    ingredient.add()
+                    
+                    message = "Successfully added new ingredient!"
+                    app.info(message)
+                    
+                elif not isNewIngredient:
+                    message = "Ingredient '{}' already exists.".format(ingredientName)
+                    app.warn(message)
+                    
+        count += 1
+    
+    print(ingredientsList)
 
 def getNumberedAmountLabel(row):
     numberedAmountLabel = str(row) + ". "
     return numberedAmountLabel
 
-def pressAddIngredients():
+def pressConfigureIngredients():
     recipeName = getEntryLogic(recipeSelectionLabel, newRecipeEntryLabel, defaultEntry=app.getOptionBox(recipeSelectionLabel), validationFunction=validateRecipeName, errorMessage="", notifyIfManual=False)
     isNewRecipe = (getKnownInfo(recipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)
     uniqueIngredientsWindowTitle = ingredientsWindowTitle + uniqueLabel
@@ -158,7 +202,9 @@ def pressAddIngredients():
     ingredientStartRow = headingRow + 1
     if not isNewRecipe:
         recipe = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False) 
-
+        global ingredientsHaveChanged
+        ingredientsHaveChanged = True
+        
         if recipe.ingredients:
             for ingredient in recipe.ingredients:
                 amountLabel = getNumberedAmountLabel(ingredientStartRow)
@@ -176,7 +222,7 @@ def pressAddIngredients():
             addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow)
             app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
     elif isNewRecipe:
-        addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel, ingredientNameLabel=ingredientEntryLabel + uniqueLabel, startRow=ingredientStartRow)
+        addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow)
         app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
     
     app.addNamedButton(ingredientsDoneButton, ingredientsDoneButton + uniqueIngredientsWindowTitle, press, row = ingredientStartRow + 1, column=0, colspan=4)
@@ -215,59 +261,29 @@ def pressIngredientAdd(btn):
     
     global addToCurrentRow
     addToCurrentRow += 1
-
-    #newIngredientLabel = newIngredientLabel + uniqueLabel
-    #amountEntryLabel = amountEntryLabel + uniqueLabel
-    #amountUnitsLabel = amountUnitsLabel + uniqueLabel
     
-    #ingredientName = app.getEntry(newIngredientLabel)
-    #amount = app.getEntry(amountEntryLabel)
-    #units = app.getOptionBox(amountUnitsLabel)
-    #isNewIngredient = (getKnownInfo(ingredientName, Ingredient.Ingredient.ingredientIdColumn, Ingredient.Ingredient.ingredientNameColumn, Ingredient.Ingredient.ingredientTable, False) == None)
-
-    #if ingredientName != "":  
-        #ingredientsList.append({'amount': amount, 'name': ingredientName, 'units': units})
-        
-        #if isNewIngredient:
-            #ingredient = Ingredient.Ingredient(ingredientName)
-            #ingredient.add()
-            
-            #message = "Successfully added new ingredient!"
-            #app.info(message)
-            
-        #elif not isNewIngredient:
-            #message = "Ingredient '{}' already exists.".format(ingredientName)
-            #app.warn(message)
-
-    #app.setFocus(amountLabel)
-    
-def pressRecipeAdd():
-    recipeName = app.getEntry(newRecipeLabel)
+def pressRecipeSubmit():
+    recipeName = pressRecipeGo(returnName=True)
     isNewRecipe = (getKnownInfo(recipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)
-    actionType=getActionType()
-    
-    if recipeName != "" and isNewRecipe:
-        recipeType = app.getOptionBox(recipeTypeLabel)
-        cookbookType = app.getOptionBox(recipeCookbookTypeLabel)
-        description = app.getTextArea(recipeTextBoxLabel)        
-        if description == "": description = None
-        
+
+    recipeType = app.getOptionBox(recipeTypeLabel + uniqueLabel)
+    cookbookType = app.getOptionBox(recipeCookbookTypeLabel + uniqueLabel)
+    description = app.getTextArea(recipeTextBoxLabel + uniqueLabel)        
+    if description == "": description = None    
+
+    if isNewRecipe:
         addRecipe(recipeName, recipeType, cookbookType, description)
-        
-        if actionType == "update":
-            configureRecipeDropDowns()
-            
-    elif not isNewRecipe:
-        errorMessage = "Recipe '{}' already exists. Please enter a unique recipe name.".format(recipeName)
-        app.warn(errorMessage)
-        app.warningBox("Duplicate Recipe", errorMessage)
-    
-    app.clearEntry(newRecipeLabel, callFunction=False)
-    app.clearTextArea(recipeTextBoxLabel, callFunction=False)
+        updateRecipeList(recipeName)
+        app.clearEntry(newRecipeEntryLabel)        
+    else:
+        updateRecipe(recipeName, recipeType, cookbookType, description)
     
     global ingredientsList
     ingredientsList = []
     
+    global ingredientsHaveChanged
+    ingredientsHaveChanged = False
+  
 def pressNoneMeal(buttonTitle):
     day = getDayFromButton(buttonTitle)
     
@@ -308,10 +324,12 @@ def addIngredientEntries(amountLabel, unitsLabel, ingredientNameLabel, startRow)
     handleOptionBox(unitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, startRow, 1)
     app.addEntry(ingredientNameLabel, row = startRow, column = 2)    
 
-def pressRecipeGo():
+def pressRecipeGo(returnName = False):
     recipeName, isManualEntry = getEntryLogic(recipeSelectionLabel, newRecipeEntryLabel, defaultEntry=app.getOptionBox(recipeSelectionLabel), validationFunction=validateRecipeName, errorMessage="", notifyIfManual=True)
     isNewRecipe = (getKnownInfo(recipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)
     actionType = getActionType(tabType=addRecipesTab)
+    
+    if returnName: return recipeName
     
     global uniqueLabel
     uniqueLabel = str(random.random())
@@ -326,7 +344,7 @@ def pressRecipeGo():
     
     windowTitle = "{} Recipe: {}".format(windowTitlePrefix, recipeName)
     windowTitleUnique = windowTitle + uniqueLabel
-    
+
     app.startSubWindow(name=windowTitleUnique, title=windowTitle, modal=True)
     app.addLabel(windowTitleUnique, windowTitle, row=headingRow, column=0, colspan=4)
     app.setLabelFg(windowTitleUnique, "white")
@@ -342,7 +360,7 @@ def pressRecipeGo():
         recipe = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False) 
         
         app.addHorizontalSeparator(row = headingRow+2, column = 0, colspan = 4)
-        app.addButton(addIngredientsButton, press, row = headingRow + 3, column = 0, colspan=4)
+        app.addButton(configureIngredientsButton, press, row = headingRow + 3, column = 0, colspan=4)
         app.addHorizontalSeparator(row = ingredientStartRow + 1, column = 0, colspan = 4)        
         
         app.addLabel("Instructions:" + uniqueLabel, "Instructions:", row = ingredientStartRow + 2, column = 0)
@@ -357,7 +375,7 @@ def pressRecipeGo():
         app.setOptionBox(recipeCookbookTypeLabel + uniqueLabel, "None")
         
         app.addHorizontalSeparator(row = headingRow+2, column = 0, colspan = 4)
-        app.addButton(addIngredientsButton, press, row = headingRow + 3, column = 0, colspan=4)
+        app.addButton(configureIngredientsButton, press, row = headingRow + 3, column = 0, colspan=4)
         app.addHorizontalSeparator(row = headingRow+5, column = 0, colspan = 4)        
     
         app.addLabel("Instructions:" + uniqueLabel, "Instructions:", row = headingRow+6, column = 0)
@@ -391,9 +409,15 @@ def pressDateGo():
     
     configureRecipeDropDowns(actionType=actionType)
 
+def updateDropDownList(newItem, optionBoxLabel, nameColumn, table, row, column):
+    handleOptionBox(optionBoxLabel, "update", nameColumn, table, row = row, column = column)
+    app.setOptionBox(optionBoxLabel, newItem)    
+
 def updateDateList(newEntry):
-    handleOptionBox(dateEntryLabel, "update", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, row = dateRow, column = dateSelectionColumn)
-    app.setOptionBox(dateEntryLabel, newEntry)
+    updateDropDownList(newEntry, dateEntryLabel, WeekOfDate.dateNameColumn, WeekOfDate.dateTable, row = dateRow, column = dateSelectionColumn)
+
+def updateRecipeList(newRecipeName):
+    updateDropDownList(newRecipeName, recipeSelectionLabel, Recipe.recipeNameColumn, Recipe.recipeTable, row=dateRow, column=recipeSelectionColumn)
 
 def getActionType(tabType = assignRecipesTab):
     if tabType == assignRecipesTab:
