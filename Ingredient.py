@@ -43,8 +43,8 @@ class Ingredient:
             for item in ingredientsResultList:
                 ingredients.append({'name': item[0], 'amount': item[1], 'units': item[2]})
         
-        return ingredients
-
+        return ingredients       
+    
     def add(self):
         connection = DataConnection()
         query = "INSERT INTO {0} ({1}) VALUES (%s);".format(Ingredient.ingredientTable, Ingredient.ingredientNameColumn)
@@ -56,3 +56,10 @@ class Ingredient:
         message = "Ingredient name: " + self.ingredientName
 
         return message
+    
+#Ingredient.checkIfNewIngredient("Eggs")
+#Ingredient.checkIfNewIngredient("Egg")
+#Ingredient.checkIfNewIngredient("Milk")
+#Ingredient.checkIfNewIngredient("Dairy")
+#Ingredient.checkIfNewIngredient("Egg whites")
+#Ingredient.checkIfNewIngredient("Sweet potatoes")

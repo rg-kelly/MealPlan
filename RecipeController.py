@@ -19,6 +19,8 @@ newOption = "- Select or Add New -"
 ingredientsList = []
 submitButtonSuffix = "__submitButton"
 updateButtonSuffix = "__updateButton"
+deleteButtonSuffix = "__deleteButton"
+cancelButtonSuffix = "__cancelButton"
 ingredientRowSymbol = "@"
 addToCurrentRow = 0
 
@@ -33,9 +35,10 @@ def addRecipe(recipeName, recipeType, cookbookType, description):
     
 def updateRecipe(recipeName, recipeType, cookbookType, description):
     recipe = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False)
-    recipe.update(recipeName, recipeType, cookbookType, ingredientsList, description, updateIngredients=ingredientsHaveChanged)
-    
-    app.infoBox(recipeName, "Successfully updated recipe!\n\n{}".format(str(recipe)))
+    updateStatus = recipe.update(recipeName, recipeType, cookbookType, ingredientsList, description, updateIngredients=ingredientsHaveChanged)
+
+    if updateStatus == True: app.infoBox(recipeName, "Successfully updated recipe!\n\n{}".format(str(recipe)))
+    elif updateStatus != False: app.errorBox(recipeName, "Error occurred while updating recipe. {}".format(updateStatus))
 
 def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultRow, column = defaultColumn):
     isAdd = (actionType == "add")
@@ -136,16 +139,45 @@ def press(btn):
     elif btn == recipeGoAgainButton:
         pressRecipeGo()
     elif btn.__contains__(" Recipe: "):
-        pressRecipeSubmit()
-        if btn.endswith(submitButtonSuffix):
-            destroySubwindow(btn, submitButtonSuffix)
-        elif btn.endswith(updateButtonSuffix):
-            destroySubwindow(btn, updateButtonSuffix)
+        if btn.endswith(updateButtonSuffix) or btn.endswith(submitButtonSuffix):
+            pressRecipeSubmit()
+        elif btn.endswith(cancelButtonSuffix):
+            pressRecipeCancel()
+        elif btn.endswith(deleteButtonSuffix):
+            pressRecipeDelete()
+        destroyRecipeWindow(btn)
     elif btn == configureIngredientsButton:
         pressConfigureIngredients()
     elif btn.startswith(ingredientsDoneButton):
         pressIngredientsDone()
         destroySubwindow(btn, ingredientsDoneButton)
+        
+def pressRecipeCancel():
+    pass
+    
+def pressRecipeDelete():
+    #TODO: pop up box -- are you sure you want to delete?
+    recipeName = pressRecipeGo(returnName=True)
+    recipeToDelete = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False)
+    deleteStatus = recipeToDelete.delete()
+    
+    if deleteStatus == True:
+        app.infoBox(recipeName, "Successfully deleted recipe '{}'.".format(recipeName))
+        handleOptionBox(recipeSelectionLabel, "update", Recipe.recipeNameColumn, Recipe.recipeTable, row = dateRow, column = recipeSelectionColumn)
+    else:
+        app.errorBox(recipeName, "Error occurred while deleting recipe. {}".format(deleteStatus))
+
+def destroyRecipeWindow(btn):
+    if btn.endswith(submitButtonSuffix):
+        suffix = submitButtonSuffix
+    elif btn.endswith(updateButtonSuffix):
+        suffix = updateButtonSuffix
+    elif btn.endswith(deleteButtonSuffix):
+        suffix = deleteButtonSuffix
+    elif btn.endswith(cancelButtonSuffix):
+        suffix = cancelButtonSuffix
+    
+    destroySubwindow(btn, suffix)
 
 def pressIngredientsDone():
     global addToCurrentRow
@@ -176,16 +208,15 @@ def pressIngredientsDone():
                     ingredient = Ingredient.Ingredient(ingredientName)
                     ingredient.add()
                     
-                    message = "Successfully added new ingredient!"
-                    app.info(message)
+                    message = "Successfully added new ingredient '{}'!".format(ingredientName)
                     
                 elif not isNewIngredient:
                     message = "Ingredient '{}' already exists.".format(ingredientName)
-                    app.warn(message)
-                    
+                
+                print(message)
         count += 1
     
-    print(ingredientsList)
+    #print(ingredientsList)
 
 def getNumberedAmountLabel(row):
     numberedAmountLabel = str(row) + ". "
@@ -336,6 +367,9 @@ def pressRecipeGo(returnName = False):
     
     global ingredientsDoneButtonUnique
     ingredientsDoneButtonUnique = ingredientsDoneButton + ingredientsWindowTitle + uniqueLabel
+    
+    global ingredientsHaveChanged
+    ingredientsHaveChanged = False    
 
     if isNewRecipe:
         windowTitlePrefix = "Add"
@@ -365,7 +399,8 @@ def pressRecipeGo(returnName = False):
         
         app.addLabel("Instructions:" + uniqueLabel, "Instructions:", row = ingredientStartRow + 2, column = 0)
         app.addScrolledTextArea(recipeTextBoxLabel + uniqueLabel, row = ingredientStartRow + 2, column = 0, colspan = 4)
-        app.addNamedButton("Update", windowTitleUnique + updateButtonSuffix, press, row=ingredientStartRow + 3, column=0, colspan=4)
+        app.addNamedButton("Update", windowTitleUnique + updateButtonSuffix, press, row = ingredientStartRow + 3, column=1, colspan=1)
+        app.addNamedButton("Delete", windowTitleUnique + deleteButtonSuffix, press, row = ingredientStartRow + 3, column = 2, colspan=1)
         
         app.setOptionBox(recipeTypeLabel + uniqueLabel, recipe.recipeType)
         app.setOptionBox(recipeCookbookTypeLabel + uniqueLabel, recipe.cookbookType)
@@ -380,7 +415,8 @@ def pressRecipeGo(returnName = False):
     
         app.addLabel("Instructions:" + uniqueLabel, "Instructions:", row = headingRow+6, column = 0)
         app.addScrolledTextArea(recipeTextBoxLabel + uniqueLabel, row = headingRow+6, column = 0, colspan = 4)
-        app.addNamedButton("Submit", windowTitleUnique + submitButtonSuffix, press, row=headingRow + 7, column=0, colspan=4)
+        app.addNamedButton("Submit", windowTitleUnique + submitButtonSuffix, press, row=headingRow + 7, column=1, colspan=1)
+        app.addNamedButton("Cancel", windowTitleUnique + cancelButtonSuffix, press, row = headingRow + 7, column = 2, colspan=1)
         
     app.stopSubWindow()
     app.showSubWindow(windowTitleUnique)

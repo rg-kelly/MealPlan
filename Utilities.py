@@ -1,7 +1,4 @@
 from DataConnection import DataConnection
-#import Recipe
-import Type
-import Ingredient
 
 # These methods are written in a class-neutral way so that any class can utitilize them
 
@@ -48,33 +45,6 @@ def getKnownInfo(knownInfo, selectColumn, whereColumn, table, whereColumnIsInteg
 
     if info != None: return info[infoPosition]
     else: return None
-
-def handleInvalidEntry(handleValue, tableName):
-    idValuePosition = 0
-    retypeMessage = "Please retype the entry here: "
-
-    print(handleValue + " is not currently a valid entry.")
-
-    if (tableName == Recipe.Recipe.recipeTable): # The Recipe table should not have new recipes added to it in this way so 'Retype' is only option
-        handleValue = input(retypeMessage)        
-    else:
-        response = input("Type 'Retype' if you would like to retype the entry or 'New' if you would like to add " + handleValue + ": ")
-                               
-        if (tableName == Ingredient.Ingredient.ingredientTable):
-            if (response == 'New'):
-                newIngredient = Ingredient.Ingredient.createNewIngredient(handleValue)
-                newIngredient.add()
-            else:
-                handleValue = input(retypeMessage)                        
-
-        else:
-            if (response == 'New'):
-                newType = Type(handleValue)
-                newType.add()
-            else:
-                handleValue = input(retypeMessage)
-
-    return handleValue
 
 # Method for calculating new primary key values based on the currently highest value
 def generateNewKey(idColumn, tableName):

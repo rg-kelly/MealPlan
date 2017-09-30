@@ -2,6 +2,7 @@ from DataConnection import DataConnection
 import Utilities
 import Ingredient
 from Amount_Units import Amount_Units
+from sys import exc_info
 
 class Recipe:
     recipeTable = "Recipe"
@@ -98,31 +99,71 @@ class Recipe:
         
     def update(self, newRecipeName, newRecipeType, newCookbookType, newIngredientsList, newDescription, updateIngredients = True):
         queryList = []
+        insertValues = []
+        updateStatus = False
+        
         if self.recipeName != newRecipeName:
             self.recipeName = newRecipeName
-            queryList.append("UPDATE {} SET {} = {} WHERE {} = {};".format(Recipe.recipeTable, Recipe.recipeNameColumn, self.recipeName, Recipe.recipeIdColumn, self.recipeId))
+            queryList.append("UPDATE {} SET {} = %s WHERE {} = {};".format(Recipe.recipeTable, Recipe.recipeNameColumn, Recipe.recipeIdColumn, self.recipeId))
+            insertValues.append((self.recipeName,))
         if self.recipeType != newRecipeType:
             self.recipeType = newRecipeType
-            queryList.append("UPDATE {} SET {} = {} WHERE {} = {};".format(Recipe.recipeTable, Recipe.typeIdColumn, Utilities.getKnownInfo(self.recipeType, Recipe.typeIdColumn, Recipe.typeNameColumn, False), Recipe.recipeIdColumn, self.recipeId))
+            queryList.append("UPDATE {} SET {} = %s WHERE {} = {};".format(Recipe.recipeTable, Recipe.typeIdColumn, Recipe.recipeIdColumn, self.recipeId))
+            insertValues.append((Utilities.getKnownInfo(self.recipeType, Recipe.typeIdColumn, Recipe.typeNameColumn, Recipe.typeTable, False),))
         if self.cookbookType != newCookbookType:
             self.cookbookType = newCookbookType
-            queryList.append("UPDATE {} SET {} = {} WHERE {} = {};".format(Recipe.recipeTable, Recipe.cookbookTypeIdColumn, Utilities.getKnownInfo(self.cookbookType, Recipe.typeIdColumn, Recipe.typeNameColumn, False), Recipe.recipeIdColumn, self.recipeId))
+            queryList.append("UPDATE {} SET {} = %s WHERE {} = {};".format(Recipe.recipeTable, Recipe.cookbookTypeIdColumn, Recipe.recipeIdColumn, self.recipeId))
+            insertValues.append((Utilities.getKnownInfo(self.cookbookType, Recipe.typeIdColumn, Recipe.typeNameColumn, Recipe.typeTable, False),))
         if self.description != newDescription:
             self.description = newDescription
-            queryList.append("UPDATE {} SET {} = {} WHERE {} = {};".format(Recipe.recipeTable, Recipe.recipeDescriptionColumn, self.description, Recipe.recipeIdColumn, self.recipeId))
+            
+            if newDescription is not None:
+                queryList.append("UPDATE {} SET {} = %s WHERE {} = {};".format(Recipe.recipeTable, Recipe.recipeDescriptionColumn, Recipe.recipeIdColumn, self.recipeId))
+                insertValues.append((self.description,))
         if updateIngredients:
             self.ingredients = newIngredientsList
-            queryList.append("DELETE FROM {} WHERE {} = {};".format(Recipe.recipeElementTable, Recipe.recipeIdColumn, self.recipeId))
-            queryList.append(self.insertIngredients(None, returnQueryOnly=True)) # need to return tuple as well and figure out how to return it just as string and not string in list of lists..
-    
-        for query in queryList:
-            #connection = DataConnection()
-            #connection.updateData(query)
-            #connection.closeConnection()
-            print(query)
+            ingredientsQueryList, ingredientInsertValues = self.insertIngredients(None, returnQueryOnly=True)
+            queryList.append("DELETE FROM {} WHERE {} = %s;".format(Recipe.recipeElementTable, Recipe.recipeIdColumn))
+            insertValues.append((self.recipeId,))
             
+            for count in range(len(ingredientsQueryList)):
+                queryList.append(ingredientsQueryList[count])
+                insertValues.append(ingredientInsertValues[count])
+    
+        try:
+            for element in range(len(queryList)):
+                query = queryList[element]
+                values = insertValues[element]
+                
+                connection = DataConnection()
+                connection.updateData(query, values)
+                connection.closeConnection()
+                
+                updateStatus = True
+        except:
+            updateStatus = exc_info()
+
+        return updateStatus
+    
+    def delete(self):
+        recipeElementQuery = "DELETE FROM {} WHERE {} = %s;".format(Recipe.recipeElementTable, Recipe.recipeIdColumn)
+        recipeQuery = "DELETE FROM {} WHERE {} = %s;".format(Recipe.recipeTable, Recipe.recipeIdColumn)
+        bindValue = (self.recipeId,)
+        
+        try:
+            connection = DataConnection()
+            connection.updateData(recipeElementQuery, bindValue)
+            connection.updateData(recipeQuery, bindValue)
+            connection.closeConnection()
+            
+            return True
+        except:
+            return exc_info()
+    
     def insertIngredients(self, connectionInstance, returnQueryOnly = False):
         bridgeQueryList = []
+        bridgeInsertTupleList = []
+        
         for ingredient in self.ingredients:
             ingredientId = Utilities.getKnownInfo(ingredient['name'], Ingredient.Ingredient.ingredientIdColumn, Ingredient.Ingredient.ingredientNameColumn, Ingredient.Ingredient.ingredientTable, False)
             amount = ingredient['amount']
@@ -130,10 +171,14 @@ class Recipe:
             
             bridgeQuery = "INSERT INTO {} ({}, {}, {}, {}) VALUES (%s, %s, %s, %s); ".format(Recipe.recipeElementTable, Recipe.recipeIdColumn, Ingredient.Ingredient.ingredientIdColumn, Recipe.amountNameColumn, Amount_Units.unitIdColumn)
             bridgeInsertValues = (self.recipeId, ingredientId, amount, amountUnitId)
-            if not returnQueryOnly: connectionInstance.updateData(bridgeQuery, bridgeInsertValues)
-            else: bridgeQueryList.append(bridgeQuery)
+            if not returnQueryOnly:
+                connectionInstance.updateData(bridgeQuery, bridgeInsertValues)
+            else:
+                bridgeQueryList.append(bridgeQuery)
+                bridgeInsertTupleList.append((bridgeInsertValues))
             
-        if returnQueryOnly: return bridgeQueryList
+        if returnQueryOnly:
+            return bridgeQueryList, bridgeInsertTupleList
 
     def __str__(self):
         newLine = "\n"
