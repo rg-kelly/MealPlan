@@ -23,6 +23,7 @@ deleteButtonSuffix = "__deleteButton"
 cancelButtonSuffix = "__cancelButton"
 ingredientRowSymbol = "@"
 addToCurrentRow = 0
+windowTitleUniqueHiddenLabel = "ID"
 
 import ctypes
 ctypes.windll.user32.ShowWindow( ctypes.windll.kernel32.GetConsoleWindow(), 6 )
@@ -144,8 +145,8 @@ def press(btn):
         elif btn.endswith(cancelButtonSuffix):
             pressRecipeCancel()
         elif btn.endswith(deleteButtonSuffix):
-            pressRecipeDelete()
-        destroyRecipeWindow(btn)
+            pressRecipeDelete(btn)
+        if not btn.endswith(deleteButtonSuffix): destroyRecipeWindow(btn)
     elif btn == configureIngredientsButton:
         pressConfigureIngredients()
     elif btn.startswith(ingredientsDoneButton):
@@ -155,17 +156,20 @@ def press(btn):
 def pressRecipeCancel():
     pass
     
-def pressRecipeDelete():
-    #TODO: pop up box -- are you sure you want to delete?
+def pressRecipeDelete(btn):
     recipeName = pressRecipeGo(returnName=True)
-    recipeToDelete = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False)
-    deleteStatus = recipeToDelete.delete()
+    isOkayToDelete = app.yesNoBox(title="Verify Delete", message="Are you sure you want to delete recipe '{}'?".format(recipeName), parent=app.getLabel(windowTitleUniqueHiddenLabel))
     
-    if deleteStatus == True:
-        app.infoBox(recipeName, "Successfully deleted recipe '{}'.".format(recipeName))
-        handleOptionBox(recipeSelectionLabel, "update", Recipe.recipeNameColumn, Recipe.recipeTable, row = dateRow, column = recipeSelectionColumn)
-    else:
-        app.errorBox(recipeName, "Error occurred while deleting recipe. {}".format(deleteStatus))
+    if isOkayToDelete:
+        recipeToDelete = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False)
+        deleteStatus = recipeToDelete.delete()
+        
+        if deleteStatus == True:
+            app.infoBox(recipeName, "Successfully deleted recipe '{}'.".format(recipeName))
+            destroyRecipeWindow(btn)
+            handleOptionBox(recipeSelectionLabel, "update", Recipe.recipeNameColumn, Recipe.recipeTable, row = dateRow, column = recipeSelectionColumn)
+        else:
+            app.errorBox(recipeName, "Error occurred while deleting recipe. {}".format(deleteStatus))
 
 def destroyRecipeWindow(btn):
     if btn.endswith(submitButtonSuffix):
@@ -380,6 +384,8 @@ def pressRecipeGo(returnName = False):
     windowTitleUnique = windowTitle + uniqueLabel
 
     app.startSubWindow(name=windowTitleUnique, title=windowTitle, modal=True)
+    app.addLabel(windowTitleUniqueHiddenLabel, windowTitleUnique)
+    app.hideLabel(windowTitleUniqueHiddenLabel)
     app.addLabel(windowTitleUnique, windowTitle, row=headingRow, column=0, colspan=4)
     app.setLabelFg(windowTitleUnique, "white")
     app.setLabelBg(windowTitleUnique, "gray")
@@ -542,26 +548,6 @@ def addToCalendar(day, dateEntry, summary):
     dateDict = {}        
     dateDict[day] = datetime.strftime(datetime.strptime(dateEntry, dateFormat) + timedelta(days=daysOfWeek.index(day)), dateFormat) 
     Calendar.main(summary, dateDict[day], app.getEntry(startLabelDinner), app.getEntry(endLabelDinner))
-
-#def collectIngredientInfo(cls): # Method for collecting ingredient information from user
-    #print("Enter the names of the required ingredients.") # Instructions for entering ingredient information
-    #print("After you type the ingredient name, you will be prompted to enter the required amount for that ingredient.")
-    #print("Type 'done' when finished entering all the ingredients.")
-    
-    #ingredientList = []
-    #count = 1
-    #done = False
-    
-    #while not done:
-        #ingredientName = input("Ingredient #" + str(count) + ": ")
-
-        #if (ingredientName == 'done'): done = True
-        #else:           
-            #entireElement = input("Enter the required amount for " + ingredientName + " (e.g. 1 cup): ")
-            #ingredientList += [[entireElement, ingredientName]]     # Add the input amount/units and ingredient name to list as a list (list within a list format)
-            #count += 1
-            
-    #return ingredientList 
 
 configureGui(app, handleOptionBox, press)
 app.go()
