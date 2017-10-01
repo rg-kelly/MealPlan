@@ -9,10 +9,13 @@ from datetime import timedelta
 from WeekOfDate import WeekOfDate
 from Settings import Settings
 from Purchase_History import Purchase_History
+import Ingredient
 import random
 
 app = gui("Meal Plan Configuration")
 app.setLogLevel("ERROR")
+#app.setIcon(".\icon.gif")
+
 dateFormat = "%Y-%m-%d"
 timeFormat = "%I:%M"
 newOption = "- Select or Add New -"
@@ -49,11 +52,11 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
     isUnlabeledSelection = (labelName.__contains__("Selection"))
     isUniqueLabel = (labelName.__contains__("0."))
 
-    if nameColumn != WeekOfDate.dateNameColumn:
+    if nameColumn != WeekOfDate.dateNameColumn or labelName == weekOfDatePurchaseSelectionLabel:
         optionsList = listOptions(nameColumn, tableName, True)
     if nameColumn == Recipe.recipeNameColumn and labelName.__contains__("day"):
         optionsList = DayAssignment.updateRecipeList(getDateEntry(), labelName, optionsList, isSide)        
-    elif nameColumn == WeekOfDate.dateNameColumn:
+    elif nameColumn == WeekOfDate.dateNameColumn and labelName != weekOfDatePurchaseSelectionLabel:
         optionsList = WeekOfDate.findClosestWeekOfDate(listOptions=True)
         optionsList.insert(0, newOption)
 
@@ -204,13 +207,14 @@ def pressIngredientsDone():
 
         if not done:
             isNewIngredient = (getKnownInfo(ingredientName, Ingredient.Ingredient.ingredientIdColumn, Ingredient.Ingredient.ingredientNameColumn, Ingredient.Ingredient.ingredientTable, False) == None)
-            
+
             if ingredientName != "":  
                 ingredientsList.append({'amount': amount, 'name': ingredientName, 'units': units})
                 
                 if isNewIngredient:
                     ingredient = Ingredient.Ingredient(ingredientName)
                     ingredient.add()
+                    handleOptionBox(ingredientSelectionPriceLabel, "update", Ingredient.Ingredient.ingredientNameColumn, Ingredient.Ingredient.ingredientTable, row = headingRow + 1, column = pricesColumnStart)
                     
                     message = "Successfully added new ingredient '{}'!".format(ingredientName)
                     

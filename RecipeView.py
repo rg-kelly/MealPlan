@@ -29,6 +29,7 @@ storeSelectionLabel = "Store: "
 amountPaidLabel = "$"
 amountPurchasedLabel = "Amount: "
 amountPurchasedUnitsLabel = "Unit"
+weekOfDatePurchaseSelectionLabel = "WoD: "
 updateRecipeLabel = "Recipe Selection"
 ingredientEntryLabel = "IngredientEntryLabel"
 recipeSelectionLabel = "Recipe: "
@@ -52,6 +53,7 @@ defaultColumn = 0
 dateRow = headingRow + 1
 typeHeadingRow = headingRow + 2
 submitRow = typeHeadingRow + 10
+pricesColumnStart = defaultColumn
 
 dateSelectionColumn = 0
 newDateEntryColumn = dateSelectionColumn + 1
@@ -85,7 +87,6 @@ def configureGui(app, handleOptionBox, press):
     app.addButton("Update", press)
     app.stopTab()
     
-    pricesColumnStart = defaultColumn
     app.startTab(enterPricesTab)
     app.addLabel(enterPricesTab, enterPricesTab, row = headingRow, column = pricesColumnStart, colspan = 4)
     handleOptionBox(ingredientSelectionPriceLabel, "add", Ingredient.ingredientNameColumn, Ingredient.ingredientTable, row = headingRow + 1, column = pricesColumnStart)
@@ -93,6 +94,7 @@ def configureGui(app, handleOptionBox, press):
     handleOptionBox(amountPurchasedUnitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, row = headingRow + 1, column = pricesColumnStart + 2)
     app.addLabelEntry(amountPaidLabel, row = headingRow + 2, column = pricesColumnStart)
     handleOptionBox(storeSelectionLabel, "add", Store.storeNameColumn, Store.storeTable, row = headingRow + 2, column = pricesColumnStart + 1)
+    handleOptionBox(weekOfDatePurchaseSelectionLabel, "add", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, row = headingRow + 2, column = pricesColumnStart + 2)
     app.setOptionBox(storeSelectionLabel, "Valley West Hy-Vee")
     app.setFocus(amountPurchasedLabel)
     app.addButton("Enter", press, row = headingRow + 4, column = pricesColumnStart, colspan = 3)
