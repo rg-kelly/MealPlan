@@ -277,8 +277,9 @@ def pressPurchaseEnter():
     units = app.getOptionBox(amountPurchasedUnitsLabel)
     purchasePrice = app.getEntry(amountPaidLabel)
     store = app.getOptionBox(storeSelectionLabel)
+    weekOfDate = app.getOptionBox(weekOfDatePurchaseSelectionLabel)
     
-    newPurchase = Purchase_History.createNewPurchase(ingredientName, amount, units, purchasePrice, store)
+    newPurchase = Purchase_History.createNewPurchase(ingredientName, amount, units, purchasePrice, store, weekOfDate)
     newPurchase.add()
     print(newPurchase)
     
@@ -444,6 +445,7 @@ def pressDateGo():
     if isNewDate:
         wkOfDate = WeekOfDate(dateEntry)
         wkOfDate.add()
+        handleOptionBox(weekOfDatePurchaseSelectionLabel, "update", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, row = headingRow + 2, column = pricesColumnStart + 2)
         
         for day in daysOfWeek:
             dayObj = DayAssignment.createNewDay(day, dateEntry)

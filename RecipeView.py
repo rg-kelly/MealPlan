@@ -114,4 +114,4 @@ def configureGui(app, handleOptionBox, press):
     app.setEntryDefault(newDateEntryLabel, "yyyy-mm-dd")
     app.addButton("Go", press, row = dateRow, column = goButtonColumn)
     
-    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", addRecipesTab)
+    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", enterPricesTab)
