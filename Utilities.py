@@ -18,6 +18,7 @@ def getKeyFromValue(descriptionValue, descriptionColumnName, idColumnName, table
 
         result = connection.runQuery(query)
         idValue = result.fetchone()
+        result.close()
         connection.closeConnection()
 
         if (idValue != None):
@@ -41,6 +42,7 @@ def getKnownInfo(knownInfo, selectColumn, whereColumn, table, whereColumnIsInteg
 
     result = connection.runQuery(query)
     info = result.fetchone()
+    result.close()
     connection.closeConnection()
 
     if info != None: return info[infoPosition]
@@ -56,7 +58,8 @@ def generateNewKey(idColumn, tableName):
     query = "SELECT MAX(" + idColumn + ") FROM " + tableName
 
     result = connection.runQuery(query)
-    maxKey = result.fetchone()[idValuePosition]    
+    maxKey = result.fetchone()[idValuePosition]
+    result.close()
     connection.closeConnection()
     
     if (maxKey != None):
@@ -73,6 +76,7 @@ def listOptions(nameColumn, tableName, returnList = False, orderByClause = ""): 
 
     result = connection.runQuery(query)
     resultList = result.fetchall()
+    result.close()
     connection.closeConnection()
 
     if resultList:

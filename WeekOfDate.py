@@ -33,16 +33,31 @@ class WeekOfDate:
     
         result = connection.runQuery(query)
         dateResult = result.fetchall()
+        result.close()
         connection.closeConnection()
-    
+        
         if dateResult != None:
             for item in dateResult:
-                if not listOptions:
-                    return item[0]
+                date = item[0]
+                if date is not None:
+                    if not listOptions:
+                        return date
+                    else:
+                        listOfDates.append(datetime.strftime(date, "%Y-%m-%d"))
                 else:
-                    listOfDates.append(datetime.strftime(item[0], "%Y-%m-%d"))
-        else:
-            return None
+                    query = "SELECT MAX({0}) FROM {1};".format(WeekOfDate.dateNameColumn, WeekOfDate.dateTable)
+                    result = connection.runQuery(query)
+                    result.close()
+                    dateResult = result.fetchall()
+                    connection.closeConnection()
+                    
+                    if dateResult != None:
+                        for item in dateResult:
+                            if not listOptions:
+                                return item[0]
+                            else:
+                                listOfDates.append(datetime.strftime(item[0], "%Y-%m-%d"))
+                    break
         
         if listOptions: return listOfDates
         

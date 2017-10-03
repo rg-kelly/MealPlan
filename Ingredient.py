@@ -37,6 +37,7 @@ class Ingredient:
 
         ingredientsResult = connection.runQuery(query)
         ingredientsResultList = ingredientsResult.fetchall()
+        ingredientsResult.close()
         connection.closeConnection()
 
         if ingredientsResultList:

@@ -111,7 +111,7 @@ def getEntryLogic(selectionLabel, entryLabel, defaultEntry, validationFunction, 
         app.setOptionBox(selectionLabel, actualEntry)
     else:
         actualEntry = selection
-        
+
     isValidEntry = validationFunction(actualEntry)
     if isValidEntry:
         if notifyIfManual:

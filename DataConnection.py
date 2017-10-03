@@ -13,6 +13,7 @@ class DataConnection:
     def updateData(self, query, arguments = ()):
         cursor = self.connection.cursor()
         cursor.execute(query, arguments)
+        cursor.close()
         self.connection.commit()
         
     def closeConnection(self):

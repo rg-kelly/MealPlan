@@ -35,6 +35,7 @@ class DayAssignment:
         query = "SELECT {} FROM {} WHERE {} = {} AND {} = {};".format(DayAssignment.mealIdColumn, DayAssignment.dayAssignmentTable, WeekOfDate.dateIdColumn, dateId, DayAssignment.dayIdColumn, dayId)
         result = connection.runQuery(query)
         idInfo = result.fetchone()
+        result.close()
         connection.closeConnection()
     
         if idInfo != None:
@@ -73,6 +74,7 @@ class DayAssignment:
     
         result = connection.runQuery(query)
         idInfo = result.fetchone()
+        result.close()
         connection.closeConnection()
     
         if idInfo != None: return idInfo[0]
