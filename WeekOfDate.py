@@ -46,9 +46,10 @@ class WeekOfDate:
                         listOfDates.append(datetime.strftime(date, "%Y-%m-%d"))
                 else:
                     query = "SELECT MAX({0}) FROM {1};".format(WeekOfDate.dateNameColumn, WeekOfDate.dateTable)
+                    connection = DataConnection()
                     result = connection.runQuery(query)
-                    result.close()
                     dateResult = result.fetchall()
+                    result.close()
                     connection.closeConnection()
                     
                     if dateResult != None:

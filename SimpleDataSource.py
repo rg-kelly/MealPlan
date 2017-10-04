@@ -5,5 +5,5 @@ class SimpleDataSource:
     @classmethod
     def getConnection(cls):
         
-        return mysql.connector.connect(user='root', password='Westover@64', host='localhost', database='mealplan')
+        return mysql.connector.connect(user='root', password='Clark106', host='localhost', database='mealplan', port='3306')
 

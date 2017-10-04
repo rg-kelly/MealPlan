@@ -37,6 +37,30 @@ class Purchase_History:
         connection.updateData(query, insertValues)
         connection.closeConnection()
     
+    def getAveragePricePerUnit(ingredientName):
+        priceList = []
+        
+        ingredientId = Utilities.getKnownInfo(ingredientName, Ingredient.ingredientIdColumn, Ingredient.ingredientNameColumn, Ingredient.ingredientTable, False)
+        if ingredientId:
+            query = "SELECT AVG({0}), {4} FROM {1} WHERE {2} = {3} GROUP BY {2}, {4};".format(Purchase_History.pricePerUnitColumn, Purchase_History.purchaseHistoryTable, Ingredient.ingredientIdColumn, ingredientId, Amount_Units.unitIdColumn)
+        else:
+            return None
+        
+        connection = DataConnection()
+        result = connection.runQuery(query)
+        resultList = result.fetchall()
+        result.close()
+        connection.closeConnection()
+        
+        if resultList:
+            for item in resultList:
+                averagePrice = item[0]
+                unitId = item[1]
+                
+                priceList.append([averagePrice, unitId])
+            return priceList
+        else: return None
+    
     def __str__(self):
         if self.units.endswith("s"): self.units = self.units.strip("s")
         
@@ -45,6 +69,7 @@ class Purchase_History:
         message += "Amount purchased: {} {}\n".format(self.amount, self.units)
         message += "Purchase price: {}\n".format(self.purchasePrice)
         message += "Store: {}\n".format(self.store)
-        message += "Price per {}: ${:.2f}".format(self.units, self.pricePerUnit)
+        message += "Price per {}: ${:.2f}\n".format(self.units, self.pricePerUnit)
+        message += "Week of Date: {}".format(self.weekOfDate)
         
         return message

@@ -55,7 +55,7 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
     if nameColumn != WeekOfDate.dateNameColumn or labelName == weekOfDatePurchaseSelectionLabel:
         optionsList = listOptions(nameColumn, tableName, True)
     if nameColumn == Recipe.recipeNameColumn and labelName.__contains__("day"):
-        optionsList = DayAssignment.updateRecipeList(getDateEntry(), labelName, optionsList, isSide)        
+        optionsList = DayAssignment.updateRecipeList(getDateEntry(), labelName, optionsList, isSide)
     elif nameColumn == WeekOfDate.dateNameColumn and labelName != weekOfDatePurchaseSelectionLabel:
         optionsList = WeekOfDate.findClosestWeekOfDate(listOptions=True)
         optionsList.insert(0, newOption)
