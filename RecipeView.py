@@ -76,7 +76,7 @@ def configureGui(app, handleOptionBox, press):
     recipeNameMaxLength = 50
 
     app.startTabbedFrame("recipeSubtabbedFrame")
-    app.startTab("Calendar Settings")
+    app.startTab("Settings")
     app.addCheckBox(updateCheckBoxLabel)
     app.setCheckBox(updateCheckBoxLabel, ticked=updateCalendar, callFunction=False)
     app.addLabel("dinnerSettingsLabel","Dinner Settings")
@@ -91,7 +91,7 @@ def configureGui(app, handleOptionBox, press):
     app.addLabel(enterPricesTab, enterPricesTab, row = headingRow, column = pricesColumnStart, colspan = 4)
     handleOptionBox(ingredientSelectionPriceLabel, "add", Ingredient.ingredientNameColumn, Ingredient.ingredientTable, row = headingRow + 1, column = pricesColumnStart)
     app.addLabelEntry(amountPurchasedLabel, row = headingRow + 1, column = pricesColumnStart + 1)
-    handleOptionBox(amountPurchasedUnitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, row = headingRow + 1, column = pricesColumnStart + 2)
+    handleOptionBox(amountPurchasedUnitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.isSingularWhereClause, row = headingRow + 1, column = pricesColumnStart + 2)
     app.addLabelEntry(amountPaidLabel, row = headingRow + 2, column = pricesColumnStart)
     handleOptionBox(storeSelectionLabel, "add", Store.storeNameColumn, Store.storeTable, row = headingRow + 2, column = pricesColumnStart + 1)
     handleOptionBox(weekOfDatePurchaseSelectionLabel, "add", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, row = headingRow + 2, column = pricesColumnStart + 2)

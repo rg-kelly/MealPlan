@@ -11,6 +11,7 @@ from Settings import Settings
 from Purchase_History import Purchase_History
 import Ingredient
 import random
+from Amount_Units import Amount_Units
 
 app = gui("Meal Plan Configuration")
 app.setLogLevel("ERROR")
@@ -361,7 +362,7 @@ def validateRecipeName(recipeName):
 
 def addIngredientEntries(amountLabel, unitsLabel, ingredientNameLabel, startRow):
     app.addLabelEntry(amountLabel, row=startRow, column=0)
-    handleOptionBox(unitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, startRow, 1)
+    handleOptionBox(unitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.isSingularWhereClause, startRow, 1)
     app.addEntry(ingredientNameLabel, row = startRow, column = 2)    
 
 def pressRecipeGo(returnName = False):
@@ -507,9 +508,6 @@ def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideAT
     if actionType == "add":
         app.addButton("Submit", press, row = submitRow, column = 0, colspan = 2)
         app.stopTab()
-        
-        #stopTabbedFrame = (getActionType("both") == "update")
-        #if stopTabbedFrame: app.stopTabbedFrame()
         app.stopTabbedFrame()
 
 def pressRecipeAssign():

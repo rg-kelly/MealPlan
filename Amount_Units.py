@@ -8,6 +8,13 @@ class Amount_Units:
     matchIdColumn = "Match_ID"
     isPluralColumn = "is_Plural"
     
+    isPluralIndicator = 1
+    isSingularIndicator = 0
+    
+    pluralWhereClauseBeginning = "{} WHERE {} = ".format(amountUnitsTable, isPluralColumn)
+    isPluralWhereClause = "{} {};".format(pluralWhereClauseBeginning, isPluralIndicator)
+    isSingularWhereClause = "{} {};".format(pluralWhereClauseBeginning, isSingularIndicator)
+    
     def __init__(self, unitId, unitName):
         self.unitId = unitId
         self.unitName = unitName
