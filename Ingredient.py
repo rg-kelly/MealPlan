@@ -57,10 +57,3 @@ class Ingredient:
         message = "Ingredient name: " + self.ingredientName
 
         return message
-    
-#Ingredient.checkIfNewIngredient("Eggs")
-#Ingredient.checkIfNewIngredient("Egg")
-#Ingredient.checkIfNewIngredient("Milk")
-#Ingredient.checkIfNewIngredient("Dairy")
-#Ingredient.checkIfNewIngredient("Egg whites")
-#Ingredient.checkIfNewIngredient("Sweet potatoes")

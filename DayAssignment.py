@@ -2,6 +2,8 @@ from DataConnection import DataConnection
 from RecipeModel import Recipe
 from datetime import datetime
 from WeekOfDate import WeekOfDate
+from Ingredient import Ingredient
+from Amount_Units import Amount_Units
 import Utilities
 
 class DayAssignment:
@@ -133,6 +135,69 @@ class DayAssignment:
     
         return recipeList    
     
+    def getIngredientsList(weekOfDate):
+        query = """SELECT {ingredientTable}.{ingredientName}, SUM({recipeElementTable}.{amount}), {unitsTable}.{unit}
+                    FROM {recipeElementTable}
+                    JOIN {ingredientTable} ON {recipeElementTable}.{ingredientId} = {ingredientTable}.{ingredientId}
+                    JOIN {recipeTable} ON {recipeTable}.{recipeId} = {recipeElementTable}.{recipeId}
+                    JOIN {mealAssignmentTable} ON {mealAssignmentTable}.{mainId} = {recipeTable}.{recipeId}
+                    JOIN {dayAssignmentTable} ON {dayAssignmentTable}.{mealId} = {mealAssignmentTable}.{mealId}
+                    JOIN {unitsTable} ON {unitsTable}.{unitId} = {recipeElementTable}.{unitId}
+                    JOIN {dateTable} ON {dateTable}.{dateId} = {dayAssignmentTable}.{dateId}
+                    WHERE {dateTable}.{dateName} = '{insertWeekOfDate}'
+                    GROUP BY {ingredientTable}.{ingredientName}, {unitsTable}.{unit}
+                    UNION
+                    SELECT {ingredientTable}.{ingredientName}, SUM({recipeElementTable}.{amount}), {unitsTable}.{unit}
+                    FROM {recipeElementTable}
+                    JOIN {ingredientTable} ON {recipeElementTable}.{ingredientId} = {ingredientTable}.{ingredientId}
+                    JOIN {recipeTable} ON {recipeTable}.{recipeId} = {recipeElementTable}.{recipeId}
+                    JOIN {mealAssignmentTable} ON {mealAssignmentTable}.{sideAId} = {recipeTable}.{recipeId}
+                    JOIN {dayAssignmentTable} ON {dayAssignmentTable}.{mealId} = {mealAssignmentTable}.{mealId}
+                    JOIN {unitsTable} ON {unitsTable}.{unitId} = {recipeElementTable}.{unitId}
+                    JOIN {dateTable} ON {dateTable}.{dateId} = {dayAssignmentTable}.{dateId}
+                    WHERE {dateTable}.{dateName} = '{insertWeekOfDate}'
+                    GROUP BY {ingredientTable}.{ingredientName}, {unitsTable}.{unit}
+                    UNION
+                    SELECT {ingredientTable}.{ingredientName}, SUM({recipeElementTable}.{amount}), {unitsTable}.{unit}
+                    FROM {recipeElementTable}
+                    JOIN {ingredientTable} ON {recipeElementTable}.{ingredientId} = {ingredientTable}.{ingredientId}
+                    JOIN {recipeTable} ON {recipeTable}.{recipeId} = {recipeElementTable}.{recipeId}
+                    JOIN {mealAssignmentTable} ON {mealAssignmentTable}.{sideBId} = {recipeTable}.{recipeId}
+                    JOIN {dayAssignmentTable} ON {dayAssignmentTable}.{mealId} = {mealAssignmentTable}.{mealId}
+                    JOIN {unitsTable} ON {unitsTable}.{unitId} = {recipeElementTable}.{unitId}
+                    JOIN {dateTable} ON {dateTable}.{dateId} = {dayAssignmentTable}.{dateId}
+                    WHERE {dateTable}.{dateName} = '{insertWeekOfDate}'
+                    GROUP BY {ingredientTable}.{ingredientName}, {unitsTable}.{unit};""".format(ingredientTable=Ingredient.ingredientTable,
+                                                                                                ingredientId=Ingredient.ingredientIdColumn,
+                                                                                                ingredientName=Ingredient.ingredientNameColumn,
+                                                                                                recipeElementTable=Recipe.recipeElementTable,
+                                                                                                amount=Recipe.amountNameColumn,
+                                                                                                unitsTable=Amount_Units.amountUnitsTable,
+                                                                                                unitId=Amount_Units.unitIdColumn,
+                                                                                                unit=Amount_Units.unitNameColumn,
+                                                                                                recipeTable=Recipe.recipeTable,
+                                                                                                recipeId=Recipe.recipeIdColumn,
+                                                                                                mealAssignmentTable=DayAssignment.mealAssignmentTable,
+                                                                                                mealId=DayAssignment.mealIdColumn,
+                                                                                                mainId=DayAssignment.mainIdColumn,
+                                                                                                sideAId=DayAssignment.sideAIdColumn,
+                                                                                                sideBId=DayAssignment.sideBIdColumn,
+                                                                                                dayAssignmentTable=DayAssignment.dayAssignmentTable,
+                                                                                                dateTable=WeekOfDate.dateTable,
+                                                                                                dateId=WeekOfDate.dateIdColumn,
+                                                                                                dateName=WeekOfDate.dateNameColumn,
+                                                                                                insertWeekOfDate=weekOfDate)
+        connection = DataConnection()
+        result = connection.runQuery(query)
+        ingredientListResult = result.fetchall()
+        result.close()
+        connection.closeConnection()
+        
+        if ingredientListResult:
+            return ingredientListResult
+        else:
+            return None
+    
     def add(self):
         connection = DataConnection()
         query = "INSERT INTO {0} ({1},{2},{3}) VALUES(%s, %s, %s);".format(DayAssignment.dayAssignmentTable, DayAssignment.dayIdColumn, WeekOfDate.dateIdColumn, DayAssignment.mealIdColumn)
@@ -153,3 +218,5 @@ class DayAssignment:
         message += "Side dish B: " + self.sideB
 
         return message
+    
+DayAssignment.getIngredientsList('2017-10-02')

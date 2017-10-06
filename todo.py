@@ -1,5 +1,6 @@
 """
 TODO:
+- Be able to update the recipe's name
 - Auto-set units based on units most often used in the past for ingredients
 - Ingredient drop down for 'configure ingredients' screen? (Logic for not adding duplicate ingredients because of plurality... maybe use like query to try to catch and then throw a 'did you mean this' window for user to verify...)
 #- Intelligence to project this week's grocery bill (would need some kind of inventory tracker and place to add misc foods like snacks/bfast)
