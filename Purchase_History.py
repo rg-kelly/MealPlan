@@ -38,13 +38,23 @@ class Purchase_History:
         connection.closeConnection()
     
     def getAveragePricePerUnit(ingredientName):
-        priceList = []
+        defaultPrice = 0
+        defaultUnits = "lb"
         
         ingredientId = Utilities.getKnownInfo(ingredientName, Ingredient.ingredientIdColumn, Ingredient.ingredientNameColumn, Ingredient.ingredientTable, False)
         if ingredientId:
-            query = "SELECT AVG({0}), {4} FROM {1} WHERE {2} = {3} GROUP BY {2}, {4};".format(Purchase_History.pricePerUnitColumn, Purchase_History.purchaseHistoryTable, Ingredient.ingredientIdColumn, ingredientId, Amount_Units.unitIdColumn)
+            query = """SELECT AVG({1}.{0}), {5}.{6}
+                        FROM {1} JOIN {5} ON {1}.{4} = {5}.{4}
+                        WHERE {1}.{2} = {3}
+                        GROUP BY {1}.{2}, {5}.{6};""".format(Purchase_History.pricePerUnitColumn,
+                                                    Purchase_History.purchaseHistoryTable,
+                                                    Ingredient.ingredientIdColumn,
+                                                    ingredientId,
+                                                    Amount_Units.unitIdColumn,
+                                                    Amount_Units.amountUnitsTable,
+                                                    Amount_Units.unitNameColumn)
         else:
-            return None
+            return defaultPrice, defaultUnits
         
         connection = DataConnection()
         result = connection.runQuery(query)
@@ -53,13 +63,15 @@ class Purchase_History:
         connection.closeConnection()
         
         if resultList:
-            for item in resultList:
-                averagePrice = item[0]
-                unitId = item[1]
+            firstRow = 0
+            firstColumn = 0
+            secondColumn = 1
+            
+            averagePrice = resultList[firstRow][firstColumn]    # May need to update if there is a case where more than one row would be returned...
+            unit = resultList[firstRow][secondColumn]
                 
-                priceList.append([averagePrice, unitId])
-            return priceList
-        else: return None
+            return averagePrice, unit
+        else: return defaultPrice, defaultUnits
     
     def __str__(self):
         if self.units.endswith("s"): self.units = self.units.strip("s")
@@ -73,3 +85,7 @@ class Purchase_History:
         message += "Week of Date: {}".format(self.weekOfDate)
         
         return message
+
+#amount, unit = Purchase_History.getAveragePricePerUnit("Salsa")
+#print(amount)
+#print(unit)

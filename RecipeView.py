@@ -97,6 +97,7 @@ def configureGui(app, handleOptionBox, press):
     handleOptionBox(weekOfDatePurchaseSelectionLabel, "add", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, row = headingRow + 2, column = pricesColumnStart + 2)
     app.setOptionBox(storeSelectionLabel, "Valley West Hy-Vee")
     app.setFocus(amountPurchasedLabel)
+    app.setOptionBox(weekOfDatePurchaseSelectionLabel, str(WeekOfDate.findClosestWeekOfDate()))
     app.addButton("Enter", press, row = headingRow + 4, column = pricesColumnStart, colspan = 3)
     app.stopTab()
     

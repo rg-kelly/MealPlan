@@ -12,6 +12,10 @@ from Purchase_History import Purchase_History
 import Ingredient
 import random
 from Amount_Units import Amount_Units
+from pint import UnitRegistry
+
+ureg = UnitRegistry()
+Q_ = ureg.Quantity
 
 app = gui("Meal Plan Configuration")
 app.setLogLevel("ERROR")
@@ -54,7 +58,7 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
     isUniqueLabel = (labelName.__contains__("0."))
 
     if nameColumn != WeekOfDate.dateNameColumn or labelName == weekOfDatePurchaseSelectionLabel:
-        optionsList = listOptions(nameColumn, tableName, True)
+        optionsList = listOptions(nameColumn, tableName, True)        
     if nameColumn == Recipe.recipeNameColumn and labelName.__contains__("day"):
         optionsList = DayAssignment.updateRecipeList(getDateEntry(), labelName, optionsList, isSide)
     elif nameColumn == WeekOfDate.dateNameColumn and labelName != weekOfDatePurchaseSelectionLabel:
@@ -125,6 +129,47 @@ def getEntryLogic(selectionLabel, entryLabel, defaultEntry, validationFunction, 
         app.clearEntry(entryLabel)
         raise Exception(message)
 
+def getProjectedGroceryBill(weekOfDate):
+    ingredientsList = DayAssignment.getIngredientsList(weekOfDate=weekOfDate)
+    defaultPrice = 0
+    projectedPrice = 0
+    
+    for item in ingredientsList:
+        ingredientName = item[0]
+        amount = item[1]
+        unit = item[2]
+        
+        if ingredientName is not None:
+            ingredientPrice, requiredUnit, perUnit = getIngredientPrice(ingredientName, amount, unit)
+            
+            if ingredientPrice:
+                projectedPrice += float(ingredientPrice)
+            else:
+                print("{}: {} -> {}".format(ingredientName, requiredUnit, perUnit))
+        
+    return projectedPrice
+
+def getIngredientPrice(ingredientName, amount, unit):
+    averagePrice, perUnit = Purchase_History.getAveragePricePerUnit(ingredientName)
+    try:
+        averagePrice = Q_(averagePrice, perUnit)
+        requiredAmount = Q_(amount, unit)
+        
+        if averagePrice.units != requiredAmount.units:
+            requiredAmount.ito(averagePrice.units)
+    
+        averagePrice = Q_(averagePrice, "{} / {}".format(1, perUnit))
+        calculatedPrice = averagePrice * requiredAmount
+        calculatedPrice = str(calculatedPrice).split(" ")[0]
+        
+        return calculatedPrice, False, False
+    except:
+        if unit == perUnit:
+            calculatedPrice = averagePrice * int(amount)
+            return calculatedPrice, False, False
+        else:
+            return False, unit, perUnit
+        
 def press(btn):
     #print(btn)
     if btn == "Cancel":
@@ -553,5 +598,7 @@ def addToCalendar(day, dateEntry, summary):
     dateDict[day] = datetime.strftime(datetime.strptime(dateEntry, dateFormat) + timedelta(days=daysOfWeek.index(day)), dateFormat) 
     Calendar.main(summary, dateDict[day], app.getEntry(startLabelDinner), app.getEntry(endLabelDinner))
 
-configureGui(app, handleOptionBox, press)
-app.go()
+#print(getIngredientPrice("Bacon", 16, "oz"))
+print(getProjectedGroceryBill('2017-10-02'))
+#configureGui(app, handleOptionBox, press)
+#app.go()
