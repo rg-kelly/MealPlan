@@ -599,6 +599,6 @@ def addToCalendar(day, dateEntry, summary):
     Calendar.main(summary, dateDict[day], app.getEntry(startLabelDinner), app.getEntry(endLabelDinner))
 
 #print(getIngredientPrice("Bacon", 16, "oz"))
-print(getProjectedGroceryBill('2017-10-02'))
-#configureGui(app, handleOptionBox, press)
-#app.go()
+#print(getProjectedGroceryBill('2017-10-02'))
+configureGui(app, handleOptionBox, press)
+app.go()
