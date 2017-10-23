@@ -20,4 +20,5 @@ TODO:
 - Lunch and breakfast capabilities
 - Add recipes to 'cookbook' in slides (attribute in recipe table for distinguishing dessert from main from soup...)
 - Ability to switch meals from one day to another
+- Store extra reminder (True/False and length) info in db instead of hard code in calendar.py
 """

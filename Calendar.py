@@ -64,8 +64,10 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
         orderBy='startTime').execute()    
     events = eventsResult.get('items', [])    
     newSummaryIsNone = (summaryParam == "")
+    defaultExtraReminder = {'useDefault': False, 'overrides': [{'minutes': 540, 'method': 'popup'}, {'minutes': 30, 'method': 'popup'}]}
     
     if events:
+        #print(events)
         if newSummaryIsNone:
             print("====== Deleting existing event ======")
             service.events().delete(calendarId=mealCalendarId, eventId=events[0].get('id', None)).execute()
@@ -76,6 +78,11 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
             if currentSummary != None and currentSummary != summaryParam:            
                 print("====== Updating existing event ======")
                 event['summary'] = summaryParam
+                
+                if checkIfMealNeedsExtraReminder(summaryParam):
+                    print("************ Adding extra reminder...")
+                    event['reminders'] = defaultExtraReminder                
+                
                 updated_event = service.events().update(calendarId=mealCalendarId, eventId=event['id'], body=event).execute()
                 print(updated_event['updated'])
             else:
@@ -85,11 +92,25 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
         eventBody = {"summary": summaryParam,
          "start": {"dateTime": "{}T1{}:00-07:00".format(date, start)},
          "end": {"dateTime": "{}T1{}:00-07:00".format(date, end)}}
+        
+        if checkIfMealNeedsExtraReminder(summaryParam):
+            print("************ Adding extra reminder...")
+            eventBody['reminders'] = defaultExtraReminder
+        
         event = service.events().insert(calendarId=mealCalendarId, body=eventBody).execute()
         print("====== Event created ======")
 
     elif not events and newSummaryIsNone:
         print("====== No current events and no new summary is provided - nothing to do here ======")
-            
+    
+def checkIfMealNeedsExtraReminder(mealName):
+    extraReminderRecipeList = ["Pulled pork"]
+    
+    for recipe in extraReminderRecipeList:
+        if mealName.__contains__(recipe):
+            return True
+        else:
+            return False
+
 if __name__ == '__main__':
     main()
