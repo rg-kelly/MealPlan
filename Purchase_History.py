@@ -9,8 +9,10 @@ class Purchase_History:
     purchaseHistoryTable = "Purchase_History"    
     purchaseIdColumn = "Purchase_ID"
     pricePerUnitColumn = "Price_Per_Unit"
+    amountColumn = "Amount"
+    notesColumn = "Notes"
     
-    def __init__(self, ingredientName, amount, units, purchasePrice, store, pricePerUnit, weekOfDate):
+    def __init__(self, ingredientName, amount, units, purchasePrice, store, pricePerUnit, weekOfDate, notes):
         self.ingredientName = ingredientName
         self.amount = amount
         self.units = units
@@ -18,12 +20,14 @@ class Purchase_History:
         self.store = store
         self.pricePerUnit = pricePerUnit
         self.weekOfDate = weekOfDate
+        self.amount = amount
+        self.notes = notes
     
     @classmethod
-    def createNewPurchase(cls, ingredientName, amount, units, purchasePrice, store, weekOfDate):
+    def createNewPurchase(cls, ingredientName, amount, units, purchasePrice, store, weekOfDate, notes):
         pricePerUnit = (float(purchasePrice) / float(amount))
         
-        return Purchase_History(ingredientName, amount, units, purchasePrice, store, pricePerUnit, weekOfDate)
+        return Purchase_History(ingredientName, amount, units, purchasePrice, store, pricePerUnit, weekOfDate, notes)
     
     def add(self):
         unitId = Utilities.getKnownInfo(self.units, Amount_Units.unitIdColumn, Amount_Units.unitNameColumn, Amount_Units.amountUnitsTable, False)
@@ -32,10 +36,57 @@ class Purchase_History:
         dateId = Utilities.getKnownInfo(self.weekOfDate, WeekOfDate.dateIdColumn, WeekOfDate.dateNameColumn, WeekOfDate.dateTable, False)
         
         connection = DataConnection()
-        query = "INSERT INTO {} ({}, {}, {}, {}, {}) VALUES (%s, %s, %s, %s, %s);".format(Purchase_History.purchaseHistoryTable, Purchase_History.pricePerUnitColumn, Ingredient.ingredientIdColumn, Store.storeIdColumn, Amount_Units.unitIdColumn, WeekOfDate.dateIdColumn)
-        insertValues = (self.pricePerUnit, ingredientId, storeId, unitId, dateId)
+        query = "INSERT INTO {} ({}, {}, {}, {}, {}, {}, {}) VALUES (%s, %s, %s, %s, %s, %s, %s);".format(Purchase_History.purchaseHistoryTable,
+                                                                                                          Purchase_History.pricePerUnitColumn,
+                                                                                                          Ingredient.ingredientIdColumn,
+                                                                                                          Store.storeIdColumn,
+                                                                                                          Amount_Units.unitIdColumn,
+                                                                                                          WeekOfDate.dateIdColumn,
+                                                                                                          Purchase_History.amountColumn,
+                                                                                                          Purchase_History.notesColumn)
+        insertValues = (self.pricePerUnit, ingredientId, storeId, unitId, dateId, self.amount, self.notes)
         connection.updateData(query, insertValues)
         connection.closeConnection()
+    
+    def getMostCommonUnit(ingredientName, returnAmount = False):
+        query = """SELECT {0}, {1}, {2}, {3}, MAX(Number_Of_Uses) FROM 
+                    (SELECT {4}.{0}, {4}.{1}, {5}.{2}, {6}.{3}, COUNT({5}.{7}) AS Number_Of_Uses
+                    FROM {5}
+                    JOIN {6} ON {5}.{8} = {6}.{8}
+                    JOIN {4} ON {4}.{0} = {5}.{0}
+                    WHERE {4}.{1} = '{9}'
+                    GROUP BY {4}.{0}, {4}.{1}, {5}.{2}, {6}.{3}) AS Count;""".format(Ingredient.ingredientIdColumn,
+                                                                                     Ingredient.ingredientNameColumn,
+                                                                                     Purchase_History.amountColumn,
+                                                                                     Amount_Units.unitNameColumn,
+                                                                                     Ingredient.ingredientTable,
+                                                                                     Purchase_History.purchaseHistoryTable,
+                                                                                     Amount_Units.amountUnitsTable,
+                                                                                     Purchase_History.purchaseIdColumn,
+                                                                                     Amount_Units.unitIdColumn,
+                                                                                     ingredientName)
+        
+        connection = DataConnection()
+        result = connection.runQuery(query)
+        resultList = result.fetchall()
+        result.close()
+        connection.closeConnection()
+        
+        if resultList:
+            firstRow = 0
+            unitsColumnPosition = 3
+            units = resultList[firstRow][unitsColumnPosition]
+            
+            if returnAmount:
+                amountColumnPosition = 2
+                amount = resultList[firstRow][amountColumnPosition]
+                
+                return amount, units
+            else:
+                return units
+        else:
+            return None
+                
     
     def getAveragePricePerUnit(ingredientName):
         defaultPrice = 0
@@ -89,3 +140,5 @@ class Purchase_History:
 #amount, unit = Purchase_History.getAveragePricePerUnit("Salsa")
 #print(amount)
 #print(unit)
+
+#print(Purchase_History.getMostCommonUnit('Salsa'))
