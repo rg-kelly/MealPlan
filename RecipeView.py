@@ -4,7 +4,7 @@ from WeekOfDate import *
 from DayAssignment import DayAssignment
 from AddView import addItem
 from Utilities import listOptions
-from Settings import Settings
+from Settings import *
 from Amount_Units import Amount_Units
 from Ingredient import Ingredient
 from Store import Store
@@ -116,3 +116,12 @@ def configureGui(app, handleOptionBox, press):
     app.addButton("Go", press, row = dateRow, column = goButtonColumn)
     
     app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", enterPricesTab)
+    
+def displayProjectedGroceryBill(app, projection):
+    formattedProjection = "${:.2f}".format(projection)
+    app.addLabel(formattedProjection, formattedProjection, row = submitRow, column = 3)
+    
+    if projection > budgetThreshold:
+        app.setLabelBg(formattedProjection, "red")
+    else:
+        app.setLabelBg(formattedProjection, "green")

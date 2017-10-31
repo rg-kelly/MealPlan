@@ -2,6 +2,8 @@ from DataConnection import DataConnection
 import Utilities
 from ast import literal_eval
 
+budgetThreshold = 70  #TODO: Store in db
+
 class Settings:
     settingsTable = "Setting"
     settingIdColumn = "ID"

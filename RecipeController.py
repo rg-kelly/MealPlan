@@ -144,8 +144,10 @@ def getProjectedGroceryBill(weekOfDate):
             
             if ingredientPrice:
                 projectedPrice += float(ingredientPrice)
+            elif perUnit == False:
+                print("{}: No purchase history".format(ingredientName))
             else:
-                print("{}: {} -> {}".format(ingredientName, requiredUnit, perUnit))
+                print("{}: Having trouble converting {} -> {}".format(ingredientName, requiredUnit, perUnit))
         
     return projectedPrice
 
@@ -565,10 +567,16 @@ def pressRecipeAssign():
             updateAssignment(day, mainDishInput, sideAInput, sideBInput)
         
         app.infoBox("Success", "Successfully updated recipe assignments!")
-
+        
     except:
         app.errorBox("ERROR", "Error occurred during recipe assignment. See console log for details.")
 
+    print("********************************************")
+    projectedBill = getProjectedGroceryBill(getDateEntry())
+    print(projectedBill)
+    print("********************************************\n")
+    displayProjectedGroceryBill(app, projectedBill)
+    
     for i in range(2):
         print("=====================================")    
     
@@ -599,6 +607,6 @@ def addToCalendar(day, dateEntry, summary):
     Calendar.main(summary, dateDict[day], app.getEntry(startLabelDinner), app.getEntry(endLabelDinner))
 
 #print(getIngredientPrice("Bacon", 16, "oz"))
-print(getProjectedGroceryBill('2017-10-02'))
+#print(getProjectedGroceryBill('2017-10-02'))
 configureGui(app, handleOptionBox, press)
 app.go()

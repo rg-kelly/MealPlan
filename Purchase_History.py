@@ -90,7 +90,7 @@ class Purchase_History:
     
     def getAveragePricePerUnit(ingredientName):
         defaultPrice = 0
-        defaultUnits = "lb"
+        defaultUnits = False
         
         ingredientId = Utilities.getKnownInfo(ingredientName, Ingredient.ingredientIdColumn, Ingredient.ingredientNameColumn, Ingredient.ingredientTable, False)
         if ingredientId:
