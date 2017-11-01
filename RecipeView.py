@@ -119,7 +119,7 @@ def configureGui(app, handleOptionBox, press):
     
 def displayProjectedGroceryBill(app, projection):
     formattedProjection = "${:.2f}".format(projection)
-    app.addLabel(formattedProjection, formattedProjection, row = submitRow, column = 3)
+    app.addLabel(formattedProjection, formattedProjection, row = submitRow, column = 0)
     
     if projection > budgetThreshold:
         app.setLabelBg(formattedProjection, "red")

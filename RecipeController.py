@@ -553,7 +553,7 @@ def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideAT
         row += 1
 
     if actionType == "add":
-        app.addButton("Submit", press, row = submitRow, column = 0, colspan = 2)
+        app.addButton("Submit", press, row = submitRow, column = 0, colspan = 4)
         app.stopTab()
         app.stopTabbedFrame()
 
