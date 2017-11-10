@@ -86,8 +86,7 @@ class Purchase_History:
                 return units
         else:
             return None
-                
-    
+
     def getAveragePricePerUnit(ingredientName):
         defaultPrice = 0
         defaultUnits = False

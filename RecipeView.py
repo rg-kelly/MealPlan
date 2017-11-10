@@ -39,6 +39,8 @@ ingredientAddButton = "Add Button Ingredient"
 configureIngredientsButton = "Configure Ingredients"
 ingredientsWindowTitle = configureIngredientsButton
 ingredientsDoneButton = "Done"
+priceEnterButton = "Enter"
+priceAutoFillButton = "Auto Fill"
 
 addRecipesTab = "Recipes"
 assignRecipesTab = "Meal Plan"
@@ -98,7 +100,8 @@ def configureGui(app, handleOptionBox, press):
     app.setOptionBox(storeSelectionLabel, "Valley West Hy-Vee")
     app.setFocus(amountPurchasedLabel)
     app.setOptionBox(weekOfDatePurchaseSelectionLabel, str(WeekOfDate.findClosestWeekOfDate()))
-    app.addButton("Enter", press, row = headingRow + 4, column = pricesColumnStart, colspan = 3)
+    app.addButton(priceEnterButton, press, row = headingRow + 4, column = pricesColumnStart, colspan = 4)
+    #app.addButton(priceAutoFillButton, press, row = headingRow + 4, column = pricesColumnStart + 2, colspan = 1)
     app.stopTab()
     
     app.startTab(addRecipesTab)
