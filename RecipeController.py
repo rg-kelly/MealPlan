@@ -186,8 +186,10 @@ def press(btn):
         pressSettingsUpdate()
     elif btn.startswith("None"):
         pressNoneMeal(btn)
-    elif btn == "Enter":
+    elif btn == priceEnterButton:
         pressPurchaseEnter()
+    elif btn == priceAutoFillButton:
+        pressPriceAutoFill()
     elif btn == recipeGoAgainButton:
         pressRecipeGo()
     elif btn.__contains__(" Recipe: "):
@@ -203,7 +205,16 @@ def press(btn):
     elif btn.startswith(ingredientsDoneButton):
         pressIngredientsDone()
         destroySubwindow(btn, ingredientsDoneButton)
-        
+
+def pressPriceAutoFill():
+    ingredientName = app.getOptionBox(ingredientSelectionPriceLabel)
+    autoAmount, autoUnits = Purchase_History.getMostCommonUnit(ingredientName, returnAmount=True)
+
+    if autoAmount:
+        app.setEntry(amountPurchasedLabel, autoAmount)
+    if autoUnits:
+        app.setOptionBox(amountPurchasedUnitsLabel, autoUnits)
+
 def pressRecipeCancel():
     pass
     
@@ -326,13 +337,20 @@ def pressPurchaseEnter():
     purchasePrice = app.getEntry(amountPaidLabel)
     store = app.getOptionBox(storeSelectionLabel)
     weekOfDate = app.getOptionBox(weekOfDatePurchaseSelectionLabel)
+    multiplier = int(app.getEntry(multiplierEntry))
+    notes = "" # TODO: Entry spot for notes
     
-    newPurchase = Purchase_History.createNewPurchase(ingredientName, amount, units, purchasePrice, store, weekOfDate)
+    if multiplier != defaultMultiplier:
+        amount = str(float(amount) * multiplier)
+        purchasePrice = str(float(purchasePrice) * multiplier)
+    
+    newPurchase = Purchase_History.createNewPurchase(ingredientName, amount, units, purchasePrice, store, weekOfDate, notes)
     newPurchase.add()
     print(newPurchase)
     
     app.clearEntry(amountPurchasedLabel)
     app.clearEntry(amountPaidLabel)
+    app.setEntry(multiplierEntry, defaultMultiplier)
     app.setFocus(amountPurchasedLabel)
         
 def pressIngredientAdd(btn):

@@ -41,6 +41,8 @@ ingredientsWindowTitle = configureIngredientsButton
 ingredientsDoneButton = "Done"
 priceEnterButton = "Enter"
 priceAutoFillButton = "Auto Fill"
+multiplierEntry = "  x"
+defaultMultiplier = "1"
 
 addRecipesTab = "Recipes"
 assignRecipesTab = "Meal Plan"
@@ -94,14 +96,16 @@ def configureGui(app, handleOptionBox, press):
     handleOptionBox(ingredientSelectionPriceLabel, "add", Ingredient.ingredientNameColumn, Ingredient.ingredientTable, row = headingRow + 1, column = pricesColumnStart)
     app.addLabelEntry(amountPurchasedLabel, row = headingRow + 1, column = pricesColumnStart + 1)
     handleOptionBox(amountPurchasedUnitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.isSingularWhereClause, row = headingRow + 1, column = pricesColumnStart + 2)
+    app.addLabelEntry(multiplierEntry, row = headingRow + 1, column = pricesColumnStart + 3)
+    app.setEntry(multiplierEntry, defaultMultiplier)
     app.addLabelEntry(amountPaidLabel, row = headingRow + 2, column = pricesColumnStart)
     handleOptionBox(storeSelectionLabel, "add", Store.storeNameColumn, Store.storeTable, row = headingRow + 2, column = pricesColumnStart + 1)
     handleOptionBox(weekOfDatePurchaseSelectionLabel, "add", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, row = headingRow + 2, column = pricesColumnStart + 2)
     app.setOptionBox(storeSelectionLabel, "Valley West Hy-Vee")
     app.setFocus(amountPurchasedLabel)
     app.setOptionBox(weekOfDatePurchaseSelectionLabel, str(WeekOfDate.findClosestWeekOfDate()))
-    app.addButton(priceEnterButton, press, row = headingRow + 4, column = pricesColumnStart, colspan = 4)
-    #app.addButton(priceAutoFillButton, press, row = headingRow + 4, column = pricesColumnStart + 2, colspan = 1)
+    app.addButton(priceAutoFillButton, press, row = headingRow + 4, column = pricesColumnStart)
+    app.addButton(priceEnterButton, press, row = headingRow + 4, column = pricesColumnStart + 1)
     app.stopTab()
     
     app.startTab(addRecipesTab)
