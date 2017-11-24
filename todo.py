@@ -11,6 +11,7 @@ TODO:
   didn't actually buy won't affect the inventory
 #-- Auto-set units based on units most often used in the past for ingredients
 -- When choose main dish, auto select sides based on most common pairing
+- Leftovers box to check on meal plan screen for when meal will be using leftover ingredients from something made previous (and won't be counted for grocery bill)
 - Ingredient drop down for 'configure ingredients' screen? (Logic for not adding duplicate ingredients because of plurality... maybe use like query to try to catch and then throw a 'did you mean this' window for user to verify...)
 - Add amount and notes column for purchase_history
 - Tab to display inventory for ingredients (basically ingredient info page -- price per unit / last 5 purchase history, inventory, recipes...)

@@ -67,7 +67,7 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
     defaultExtraReminder = {'useDefault': False, 'overrides': [{'minutes': 540, 'method': 'popup'}, {'minutes': 30, 'method': 'popup'}]}
     
     if events:
-        #print(events)
+        print(events)
         if newSummaryIsNone:
             print("====== Deleting existing event ======")
             service.events().delete(calendarId=mealCalendarId, eventId=events[0].get('id', None)).execute()
@@ -90,8 +90,8 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
                 
     elif not events and not newSummaryIsNone:
         eventBody = {"summary": summaryParam,
-         "start": {"dateTime": "{}T1{}:00-07:00".format(date, start)},
-         "end": {"dateTime": "{}T1{}:00-07:00".format(date, end)}}
+         "start": {"dateTime": "{}T1{}:00-08:00".format(date, start)}, # 7:00 from March to Nov
+         "end": {"dateTime": "{}T1{}:00-08:00".format(date, end)}}     # 8:00 from Nov to March (Daylight savings related...)
         
         if checkIfMealNeedsExtraReminder(summaryParam):
             print("************ Adding extra reminder...")
