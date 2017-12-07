@@ -4,6 +4,7 @@ from Store import Store
 from Amount_Units import Amount_Units
 from Ingredient import Ingredient
 from WeekOfDate import WeekOfDate
+from RecipeModel import Recipe
 
 class Purchase_History:
     purchaseHistoryTable = "Purchase_History"    
@@ -49,7 +50,7 @@ class Purchase_History:
         connection.closeConnection()
     
     def getMostCommonUnit(ingredientName, returnAmount = False):
-        query = """SELECT {0}, {1}, {2}, {3}, MAX(Number_Of_Uses) FROM 
+        query = """SELECT {2}, {3}, MAX(Number_Of_Uses) FROM 
                     (SELECT {4}.{0}, {4}.{1}, {5}.{2}, {6}.{3}, COUNT({5}.{7}) AS Number_Of_Uses
                     FROM {5}
                     JOIN {6} ON {5}.{8} = {6}.{8}
@@ -72,20 +73,53 @@ class Purchase_History:
         result.close()
         connection.closeConnection()
         
-        if resultList:
-            firstRow = 0
-            unitsColumnPosition = 3
-            units = resultList[firstRow][unitsColumnPosition]
-            
+        firstRow = 0
+        unitsColumnPosition = 1
+        amountColumnPosition = 0
+
+        units = resultList[firstRow][unitsColumnPosition]
+        if units:
             if returnAmount:
-                amountColumnPosition = 2
                 amount = resultList[firstRow][amountColumnPosition]
-                
                 return amount, units
             else:
                 return units
-        else:
-            return None
+        else:            
+            unitsColumnPosition = 0
+            query = """SELECT {6}.{8}, COUNT({6}.{7}) AS NumberOfUses
+                        FROM {0}
+                        JOIN {1} ON {1}.{2} = {0}.{2}
+                        JOIN {3} ON {3}.{4} = {0}.{4}
+                        JOIN {6} ON {6}.{7} = {0}.{7}
+                        WHERE {3}.{5} LIKE '{9}'
+                        GROUP BY {6}.{8}
+                        ORDER BY NumberOfUses
+                        LIMIT 1;""".format(Recipe.recipeElementTable,
+                                           Recipe.recipeTable,
+                                           Recipe.recipeIdColumn,
+                                           Ingredient.ingredientTable,
+                                           Ingredient.ingredientIdColumn,
+                                           Ingredient.ingredientNameColumn,
+                                           Amount_Units.amountUnitsTable,
+                                           Amount_Units.unitIdColumn,
+                                           Amount_Units.unitNameColumn,
+                                           ingredientName)
+            
+            connection = DataConnection()
+            result = connection.runQuery(query)
+            resultList = result.fetchall()
+            result.close()
+            connection.closeConnection()
+            
+            units = resultList[firstRow][unitsColumnPosition]
+            if units:
+                if returnAmount:
+                    amount = ""  # Doesn't make sense to provide amount from recipe so just won't display anything for amount
+                    return amount, units
+                else:
+                    return units
+            else:
+                return None
 
     def getAveragePricePerUnit(ingredientName):
         defaultPrice = 0
@@ -140,4 +174,5 @@ class Purchase_History:
 #print(amount)
 #print(unit)
 
-#print(Purchase_History.getMostCommonUnit('Salsa'))
+unit = Purchase_History.getMostCommonUnit('Sour Cream')
+print(unit)
