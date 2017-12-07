@@ -50,6 +50,9 @@ class Purchase_History:
         connection.closeConnection()
     
     def getMostCommonUnit(ingredientName, returnAmount = False):
+        defaultAmount = ""
+        defaultUnits = "lb"
+        
         query = """SELECT {2}, {3}, MAX(Number_Of_Uses) FROM 
                     (SELECT {4}.{0}, {4}.{1}, {5}.{2}, {6}.{3}, COUNT({5}.{7}) AS Number_Of_Uses
                     FROM {5}
@@ -76,15 +79,22 @@ class Purchase_History:
         firstRow = 0
         unitsColumnPosition = 1
         amountColumnPosition = 0
+        checkRecipeUnits = False
 
-        units = resultList[firstRow][unitsColumnPosition]
-        if units:
-            if returnAmount:
-                amount = resultList[firstRow][amountColumnPosition]
-                return amount, units
+        if resultList:
+            units = resultList[firstRow][unitsColumnPosition]
+            if units:
+                if returnAmount:
+                    amount = resultList[firstRow][amountColumnPosition]
+                    return amount, units
+                else:
+                    return units
             else:
-                return units
-        else:            
+                checkRecipeUnits = True
+        else:
+            checkRecipeUnits = True
+        
+        if checkRecipeUnits:            
             unitsColumnPosition = 0
             query = """SELECT {6}.{8}, COUNT({6}.{7}) AS NumberOfUses
                         FROM {0}
@@ -111,15 +121,20 @@ class Purchase_History:
             result.close()
             connection.closeConnection()
             
-            units = resultList[firstRow][unitsColumnPosition]
-            if units:
-                if returnAmount:
-                    amount = ""  # Doesn't make sense to provide amount from recipe so just won't display anything for amount
-                    return amount, units
+            if resultList:
+                units = resultList[firstRow][unitsColumnPosition]
+                if units:
+                    if returnAmount:
+                        amount = defaultAmount  # Doesn't make sense to provide amount from recipe so just won't display anything for amount
+                        return amount, units
+                    else:
+                        return units
                 else:
-                    return units
+                    if returnAmount: return defaultAmount, defaultUnits
+                    else: return defaultUnits
             else:
-                return None
+                if returnAmount: return defaultAmount, defaultUnits
+                else: return defaultUnits
 
     def getAveragePricePerUnit(ingredientName):
         defaultPrice = 0
@@ -174,5 +189,5 @@ class Purchase_History:
 #print(amount)
 #print(unit)
 
-unit = Purchase_History.getMostCommonUnit('Sour Cream')
+unit = Purchase_History.getMostCommonUnit('Olive oil')
 print(unit)
