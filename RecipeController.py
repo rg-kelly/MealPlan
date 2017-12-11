@@ -529,6 +529,7 @@ def updateDateList(newEntry):
 
 def updateRecipeList(newRecipeName):
     updateDropDownList(newRecipeName, recipeSelectionLabel, Recipe.recipeNameColumn, Recipe.recipeTable, row=dateRow, column=recipeSelectionColumn)
+    configureRecipeDropDowns(actionType="update")
 
 def getActionType(tabType = assignRecipesTab):
     if tabType == assignRecipesTab:
