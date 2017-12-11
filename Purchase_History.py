@@ -53,22 +53,23 @@ class Purchase_History:
         defaultAmount = ""
         defaultUnits = "lb"
         
-        query = """SELECT {2}, {3}, MAX(Number_Of_Uses) FROM 
-                    (SELECT {4}.{0}, {4}.{1}, {5}.{2}, {6}.{3}, COUNT({5}.{7}) AS Number_Of_Uses
+        query = """SELECT {5}.{2}, {6}.{3}, COUNT({5}.{7}) AS Number_Of_Uses
                     FROM {5}
                     JOIN {6} ON {5}.{8} = {6}.{8}
                     JOIN {4} ON {4}.{0} = {5}.{0}
                     WHERE {4}.{1} = '{9}'
-                    GROUP BY {4}.{0}, {4}.{1}, {5}.{2}, {6}.{3}) AS Count;""".format(Ingredient.ingredientIdColumn,
-                                                                                     Ingredient.ingredientNameColumn,
-                                                                                     Purchase_History.amountColumn,
-                                                                                     Amount_Units.unitNameColumn,
-                                                                                     Ingredient.ingredientTable,
-                                                                                     Purchase_History.purchaseHistoryTable,
-                                                                                     Amount_Units.amountUnitsTable,
-                                                                                     Purchase_History.purchaseIdColumn,
-                                                                                     Amount_Units.unitIdColumn,
-                                                                                     ingredientName)
+                    GROUP BY {4}.{0}, {4}.{1}, {5}.{2}, {6}.{3}
+                    ORDER BY Number_Of_Uses DESC
+                    LIMIT 1;""".format(Ingredient.ingredientIdColumn,
+                                        Ingredient.ingredientNameColumn,
+                                        Purchase_History.amountColumn,
+                                        Amount_Units.unitNameColumn,
+                                        Ingredient.ingredientTable,
+                                        Purchase_History.purchaseHistoryTable,
+                                        Amount_Units.amountUnitsTable,
+                                        Purchase_History.purchaseIdColumn,
+                                        Amount_Units.unitIdColumn,
+                                        ingredientName)
         
         connection = DataConnection()
         result = connection.runQuery(query)
@@ -80,7 +81,7 @@ class Purchase_History:
         unitsColumnPosition = 1
         amountColumnPosition = 0
         checkRecipeUnits = False
-
+        #print(resultList)
         if resultList:
             units = resultList[firstRow][unitsColumnPosition]
             if units:
@@ -189,5 +190,5 @@ class Purchase_History:
 #print(amount)
 #print(unit)
 
-unit = Purchase_History.getMostCommonUnit('Olive oil')
-print(unit)
+#unit = Purchase_History.getMostCommonUnit('Tortilla chips')
+#print(unit)

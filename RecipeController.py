@@ -341,7 +341,8 @@ def pressPurchaseEnter():
     notes = "" # TODO: Entry spot for notes
     
     if multiplier != defaultMultiplier:
-        amount = str(float(amount) * multiplier)
+        try: amount = str(int(amount) * multiplier)
+        except: amount = str(float(amount) * multiplier)
         purchasePrice = str(float(purchasePrice) * multiplier)
     
     newPurchase = Purchase_History.createNewPurchase(ingredientName, amount, units, purchasePrice, store, weekOfDate, notes)
