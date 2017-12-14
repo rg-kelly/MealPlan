@@ -18,7 +18,7 @@ except ImportError:
 # If modifying these scopes, delete your previously saved credentials
 # at ~/.credentials/calendar-python-quickstart.json
 SCOPES = 'https://www.googleapis.com/auth/calendar'
-CLIENT_SECRET_FILE = 'client_secret.json'
+CLIENT_SECRET_FILE = 'client_secret_calendar.json'
 APPLICATION_NAME = 'Google Calendar API Python Quickstart'
 dateFormat = "%Y-%m-%d"
 
@@ -84,7 +84,7 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
                     event['reminders'] = defaultExtraReminder                
                 
                 updated_event = service.events().update(calendarId=mealCalendarId, eventId=event['id'], body=event).execute()
-                print(updated_event['updated'])
+                #print(updated_event['updated'])
             else:
                 print("====== Summary did not change - nothing to do here ======")        
                 
