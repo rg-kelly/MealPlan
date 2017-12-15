@@ -48,9 +48,8 @@ def get_credentials():
         print('Storing credentials to ' + credential_path)
     return credentials
 
-def main():
+def main(row=["Hello", "world", "and", "this", 2]):
     """Shows basic usage of the Sheets API.
-
     Creates a Sheets API service object and prints the names and majors of
     students in a sample spreadsheet:
     https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
@@ -62,20 +61,15 @@ def main():
     service = discovery.build('sheets', 'v4', http=http,
                               discoveryServiceUrl=discoveryUrl)
 
-    spreadsheetId = '1X7gLGAt9oPypG2Ab4gwx5mPoJCHpdgsk4LHYK_l2qyA'
-    rangeName = 'Goals!A2:D'
-    result = service.spreadsheets().values().get(
-        spreadsheetId=spreadsheetId, range=rangeName).execute()
-    values = result.get('values', [])
-
-    if not values:
-        print('No data found.')
-    else:
-        print('Name, Major:')
-        for row in values:
-            # Print columns A and E, which correspond to indices 0 and 4.
-            print('%s, %s' % (row[0], row[1]))
-
+    spreadsheetId = '1AM4xsTB6iL0fmSNGwYOQbxxttxA0zhWX8ufvZWZsVio'
+    rangeName = 'Sheet1!A2:H'
+    
+    values = [row]    
+    body = {'values': values}
+    result = service.spreadsheets().values().update(
+        spreadsheetId=spreadsheetId, range=rangeName,
+        valueInputOption="USER_ENTERED", body=body).execute()
+    print('{0} cells updated.'.format(result.get('updatedCells')));
 
 if __name__ == '__main__':
     main()
