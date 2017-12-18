@@ -52,7 +52,7 @@ class Row:
         if highestResult:
             highest, highestLocation = Row.formatPrice(highestResult[Row.firstRow][Row.pricePosition], highestResult[Row.firstRow][Row.unitPosition]), highestResult[Row.firstRow][Row.locationPosition]
         average = Row.getAveragePricePerUnit(itemName)
-        
+        #average = "1"
         return average, recent, recentLocation, recentDate, lowest, lowestLocation, highest, highestLocation
     
     def formatPrice(price, units):
@@ -110,11 +110,17 @@ class Row:
                                                              Amount_Units.unitNameColumn,
                                                              itemName)
         averageResult = (connection.runQuery(averageQuery)).fetchall()
+        connection.closeConnection()
         if len(averageResult) == 1:
             averagePricePerUnit = Row.formatPrice(averageResult[Row.firstRow][Row.pricePosition], averageResult[Row.firstRow][Row.unitPosition])
-        
+
         # Elif not same then find most common unit and use pint to convert other(s) to that one and then take average using python
         elif len(averageResult) > 1:
+            unitList = []            
+            for row in averageResult:
+                unitList.append(row[Row.unitPosition])
+                
+            dataList = []
             dataQuery = """SELECT {2}.{4}, {0}.{1}, {8}.{10}
                                 FROM {0}
                                 JOIN {2} ON {0}.{3} = {2}.{3}
@@ -132,10 +138,24 @@ class Row:
                                                                   Amount_Units.unitIdColumn,
                                                                   Amount_Units.unitNameColumn,
                                                                   itemName)
+            connection = DataConnection()
+            dataResult = (connection.runQuery(dataQuery)).fetchall()
+            connection.closeConnection()
             
+            for row in dataResult:
+                dataList.append([row[Row.pricePosition], row[Row.unitPosition]])
             
-
-        connection.closeConnection()
+            maxUnitCount = 0
+            unitCount = 0
+            maxUnit = ''
+            for unit in unitList:
+                for row in dataList:
+                    if row.__contains__(unit):
+                        unitCount += 1
+                if unitCount > maxUnitCount:
+                    maxUnitCount = unitCount
+                    maxUnit = unit
+            #print(maxUnit)
         
         return averagePricePerUnit
     
@@ -148,5 +168,8 @@ class Row:
         
         return summaryOfSelf
     
-testRow = Row.createNewRow('Eggs')
-print(testRow)
+#testRow = Row.createNewRow('Peanut Butter')
+#print(testRow)
+
+price = Row.getAveragePricePerUnit('Frozen corn')
+print(price)
