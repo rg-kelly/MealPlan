@@ -46,6 +46,18 @@ class Ingredient:
         
         return ingredients       
     
+    def getAllIngredients():
+        ingredientsList = []
+        connection = DataConnection()
+        query = "SELECT {} FROM {};".format(Ingredient.ingredientNameColumn, Ingredient.ingredientTable)
+        ingredientsListResult = (connection.runQuery(query)).fetchall()
+        connection.closeConnection()
+        
+        for ingredient in ingredientsListResult:
+            ingredientsList.append(ingredient[0])
+        
+        return ingredientsList
+    
     def add(self):
         connection = DataConnection()
         query = "INSERT INTO {0} ({1}) VALUES (%s);".format(Ingredient.ingredientTable, Ingredient.ingredientNameColumn)

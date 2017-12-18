@@ -210,5 +210,5 @@ class Row:
         
         return summaryOfSelf
     
-testRow = Row.createNewRow('Eggs')
-print(testRow)
+#testRow = Row.createNewRow('Eggs')
+#print(testRow)

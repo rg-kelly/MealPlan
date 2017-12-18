@@ -48,7 +48,7 @@ def get_credentials():
         print('Storing credentials to ' + credential_path)
     return credentials
 
-def main(row=["Hello", "world", "and", "this", 2]):
+def addRowToSheet(row=["Hello", "world", "and", "this", 2]):
     """Shows basic usage of the Sheets API.
     Creates a Sheets API service object and prints the names and majors of
     students in a sample spreadsheet:
@@ -70,6 +70,3 @@ def main(row=["Hello", "world", "and", "this", 2]):
         spreadsheetId=spreadsheetId, range=rangeName,
         valueInputOption="USER_ENTERED", body=body).execute()
     print('{0} cells updated.'.format(result.get('updatedCells')));
-
-if __name__ == '__main__':
-    main()
