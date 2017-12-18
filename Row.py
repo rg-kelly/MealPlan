@@ -5,6 +5,8 @@ from Store import Store
 from WeekOfDate import WeekOfDate
 from Amount_Units import Amount_Units
 from DataConnection import DataConnection
+from pint import UnitRegistry
+import numpy as np
 
 class Row:
     firstRow = 0
@@ -88,7 +90,9 @@ class Row:
         
         return query
     
-    def getAveragePricePerUnit(itemName):     
+    def getAveragePricePerUnit(itemName, returnRaw = False):
+        defaultPrice = 0
+        defaultUnits = False        
         connection = DataConnection()
         
         averageQuery = """SELECT {2}.{4}, AVG({0}.{1}), {8}.{10}
@@ -111,11 +115,17 @@ class Row:
                                                              itemName)
         averageResult = (connection.runQuery(averageQuery)).fetchall()
         connection.closeConnection()
-        if len(averageResult) == 1:
+        
+        numRowResults = len(averageResult)
+        if numRowResults == 1:
             averagePricePerUnit = Row.formatPrice(averageResult[Row.firstRow][Row.pricePosition], averageResult[Row.firstRow][Row.unitPosition])
-
-        # Elif not same then find most common unit and use pint to convert other(s) to that one and then take average using python
-        elif len(averageResult) > 1:
+            averagePriceRaw = averageResult[Row.firstRow][Row.pricePosition]
+            unitsRaw = averageResult[Row.firstRow][Row.unitPosition]
+        elif numRowResults == 0:
+            averagePricePerUnit = "N/A"
+            averagePriceRaw = defaultPrice
+            unitsRaw = defaultUnits
+        elif numRowResults > 1:
             unitList = []            
             for row in averageResult:
                 unitList.append(row[Row.unitPosition])
@@ -145,19 +155,51 @@ class Row:
             for row in dataResult:
                 dataList.append([row[Row.pricePosition], row[Row.unitPosition]])
             
-            maxUnitCount = 0
-            unitCount = 0
-            maxUnit = ''
-            for unit in unitList:
-                for row in dataList:
-                    if row.__contains__(unit):
-                        unitCount += 1
-                if unitCount > maxUnitCount:
-                    maxUnitCount = unitCount
-                    maxUnit = unit
-            #print(maxUnit)
+            mostCommonUnit = Row.getMostCommonUnit(unitList, dataList)
+            newDataList = np.array(Row.convertLeastCommonUnits(mostCommonUnit, dataList))
+            meanPrice = newDataList.mean()
+            averagePricePerUnit = Row.formatPrice(meanPrice, mostCommonUnit)
+            averagePriceRaw = meanPrice
+            unitsRaw = mostCommonUnit
+            
+        if returnRaw:
+            return averagePriceRaw, unitsRaw
+        else:
+            return averagePricePerUnit
+    
+    def getMostCommonUnit(unitList, dataList):
+        maxUnitCount = 0
+        unitCount = 0
+        maxUnit = ''
+        for unit in unitList:
+            for row in dataList:
+                if row.__contains__(unit):
+                    unitCount += 1
+            if unitCount > maxUnitCount:
+                maxUnitCount = unitCount
+                maxUnit = unit     ## Most common unit
+                
+        return maxUnit
+    
+    def convertLeastCommonUnits(mostCommonUnit, dataList):
+        ureg = UnitRegistry()
+        Q_ = ureg.Quantity
+        rowCount = 0
+        convertedDataList = []
+
+        for row in dataList:
+            price = row[0]
+            units = row[1]
+            if units != mostCommonUnit:
+                convertDivisor = Q_(1, units)
+                convertDivisor.ito(mostCommonUnit)
+                convertedPrice = price / convertDivisor.magnitude                
+                convertedDataList.append(convertedPrice)
+            else:
+                convertedDataList.append(price)
+            rowCount += 1
         
-        return averagePricePerUnit
+        return convertedDataList             
     
     def __str__(self):
         summaryOfSelf = "Name: {}\n".format(self.itemName)
@@ -168,8 +210,5 @@ class Row:
         
         return summaryOfSelf
     
-#testRow = Row.createNewRow('Peanut Butter')
-#print(testRow)
-
-price = Row.getAveragePricePerUnit('Frozen corn')
-print(price)
+testRow = Row.createNewRow('Eggs')
+print(testRow)

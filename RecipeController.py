@@ -13,6 +13,7 @@ import Ingredient
 import random
 from Amount_Units import Amount_Units
 from pint import UnitRegistry
+from Row import Row
 
 ureg = UnitRegistry()
 Q_ = ureg.Quantity
@@ -152,7 +153,7 @@ def getProjectedGroceryBill(weekOfDate):
     return projectedPrice
 
 def getIngredientPrice(ingredientName, amount, unit):
-    averagePrice, perUnit = Purchase_History.getAveragePricePerUnit(ingredientName)
+    averagePrice, perUnit = Row.getAveragePricePerUnit(ingredientName, returnRaw = True)
     try:
         averagePrice = Q_(averagePrice, perUnit)
         requiredAmount = Q_(amount, unit)

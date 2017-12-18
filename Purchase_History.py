@@ -137,7 +137,7 @@ class Purchase_History:
                 if returnAmount: return defaultAmount, defaultUnits
                 else: return defaultUnits
 
-    def getAveragePricePerUnit(ingredientName):
+    def getAveragePricePerUnit(ingredientName): ########### DEPRECATED!!!! Use Row.getAveragePricePerUnit(ingredientName, returnRaw = True) instead ###############
         defaultPrice = 0
         defaultUnits = False
         
@@ -167,7 +167,7 @@ class Purchase_History:
             firstColumn = 0
             secondColumn = 1
             
-            averagePrice = resultList[firstRow][firstColumn]    # May need to update if there is a case where more than one row would be returned...
+            averagePrice = resultList[firstRow][firstColumn]    # May need to update if there is a case where more than one row would be returned... See Row.py
             unit = resultList[firstRow][secondColumn]
                 
             return averagePrice, unit
