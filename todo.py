@@ -2,7 +2,6 @@
 TODO:
 #- Intelligence to project this week's grocery bill (still need some kind of inventory tracker and place to add misc foods like snacks/bfast)
     - Define own conversions for foods that have mass for purchase_history and volume for recipes (i.e. pb, flour, salsa, bbq sauce, etc.)
-#-- Grocery shopping reference list (in sheets) with price/unit summaries for ingredients
 -- Add 'add to inventory' check box for enter prices screen, then don't have to enter
   price but just amount and ingredient so that the pantry inventory is accurate
   and another use case is that then items that I want to enter prices for but

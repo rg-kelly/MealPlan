@@ -1,11 +1,23 @@
-from Sheets import addRowToSheet
+from Sheets import addToSheet
 from Row import Row
 from Ingredient import Ingredient
 
 class Report:
-    def createNewReport(cls):
+    def createNewReport():
         ingredientsList = Ingredient.getAllIngredients()
+        rowList = []
         
         for ingredient in ingredientsList:
             row = Row.createNewRow(ingredient)
-            addRowToSheet(row) #TODO: row is not in right form right now, needs to be list... either create list at Row level or this point...
+            rowList.append(Row.getRowList(row))
+        
+        #print(rowList)
+        addToSheet(rowList)
+        print("Done writing to sheet.")
+
+report = Report.createNewReport()
+
+# Issues:
+# - 'non-convertible' units like unit, piece, strip and pint
+# - need to handle units not being same for all price types, not just avg
+#   because otherwise the diff of units makes max/min not accurate

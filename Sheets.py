@@ -48,7 +48,7 @@ def get_credentials():
         print('Storing credentials to ' + credential_path)
     return credentials
 
-def addRowToSheet(row=["Hello", "world", "and", "this", 2]):
+def addToSheet(rowList=[["Hello", "world", "and", "this", 2], ["This", "that"]]):
     """Shows basic usage of the Sheets API.
     Creates a Sheets API service object and prints the names and majors of
     students in a sample spreadsheet:
@@ -62,11 +62,12 @@ def addRowToSheet(row=["Hello", "world", "and", "this", 2]):
                               discoveryServiceUrl=discoveryUrl)
 
     spreadsheetId = '1AM4xsTB6iL0fmSNGwYOQbxxttxA0zhWX8ufvZWZsVio'
-    rangeName = 'Sheet1!A2:H'
+    rangeName = 'Sheet1!A2:I'
     
-    values = [row]    
-    body = {'values': values}
+    body = {'values': rowList}
     result = service.spreadsheets().values().update(
         spreadsheetId=spreadsheetId, range=rangeName,
-        valueInputOption="USER_ENTERED", body=body).execute()
+        valueInputOption="RAW", body=body).execute()
     print('{0} cells updated.'.format(result.get('updatedCells')));
+
+#addToSheet()

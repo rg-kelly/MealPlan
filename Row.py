@@ -1,4 +1,3 @@
-from Sheets import main
 from Purchase_History import Purchase_History
 from Ingredient import Ingredient
 from Store import Store
@@ -7,13 +6,16 @@ from Amount_Units import Amount_Units
 from DataConnection import DataConnection
 from pint import UnitRegistry
 import numpy as np
+from datetime import datetime
 
 class Row:
     firstRow = 0
     pricePosition = 1
     unitPosition = 2
     locationPosition = 3
-    datePosition = 4    
+    datePosition = 4   
+    
+    noData = "--"
     
     def __init__(self, itemName, average, recent, recentLocation, recentDate, lowest, lowestLocation, highest, highestLocation):
         self.itemName = itemName
@@ -32,7 +34,16 @@ class Row:
         
         return Row(itemName, average, recent, recentLocation, recentDate, lowest, lowestLocation, highest, highestLocation)
     
-    def getPricePerUnit(itemName):        
+    def getRowList(self):
+        if self.recentDate != Row.noData:
+            recentDate = datetime.strftime(self.recentDate, "%m-%d-%Y")
+        else:
+            recentDate = self.recentDate
+        
+        rowList = [self.itemName, self.average, self.recent, self.recentLocation, recentDate, self.lowest, self.lowestLocation, self.highest, self.highestLocation]
+        return rowList
+    
+    def getPricePerUnit(itemName):
         recentOrderBy = "{}.{} DESC ".format(WeekOfDate.dateTable, WeekOfDate.dateNameColumn)
         lowestOrderBy = "{}.{} ASC ".format(Purchase_History.purchaseHistoryTable, Purchase_History.pricePerUnitColumn)
         highestOrderBy = "{}.{} DESC ".format(Purchase_History.purchaseHistoryTable, Purchase_History.pricePerUnitColumn)
@@ -47,15 +58,18 @@ class Row:
         highestResult = (connection.runQuery(highestQuery)).fetchall()
         connection.closeConnection()
         
-        if recentResult:
-            recent, recentLocation, recentDate = Row.formatPrice(recentResult[Row.firstRow][Row.pricePosition], recentResult[Row.firstRow][Row.unitPosition]), recentResult[Row.firstRow][Row.locationPosition], recentResult[Row.firstRow][Row.datePosition]
-        if lowestResult:
-            lowest, lowestLocation = Row.formatPrice(lowestResult[Row.firstRow][Row.pricePosition], lowestResult[Row.firstRow][Row.unitPosition]), lowestResult[Row.firstRow][Row.locationPosition]
-        if highestResult:
-            highest, highestLocation = Row.formatPrice(highestResult[Row.firstRow][Row.pricePosition], highestResult[Row.firstRow][Row.unitPosition]), highestResult[Row.firstRow][Row.locationPosition]
-        average = Row.getAveragePricePerUnit(itemName)
-        #average = "1"
-        return average, recent, recentLocation, recentDate, lowest, lowestLocation, highest, highestLocation
+        if recentResult or lowestResult or highestResult:
+            if recentResult:
+                recent, recentLocation, recentDate = Row.formatPrice(recentResult[Row.firstRow][Row.pricePosition], recentResult[Row.firstRow][Row.unitPosition]), recentResult[Row.firstRow][Row.locationPosition], recentResult[Row.firstRow][Row.datePosition]
+            if lowestResult:
+                lowest, lowestLocation = Row.formatPrice(lowestResult[Row.firstRow][Row.pricePosition], lowestResult[Row.firstRow][Row.unitPosition]), lowestResult[Row.firstRow][Row.locationPosition]
+            if highestResult:
+                highest, highestLocation = Row.formatPrice(highestResult[Row.firstRow][Row.pricePosition], highestResult[Row.firstRow][Row.unitPosition]), highestResult[Row.firstRow][Row.locationPosition]
+            average = Row.getAveragePricePerUnit(itemName)
+    
+            return average, recent, recentLocation, recentDate, lowest, lowestLocation, highest, highestLocation
+        else:
+            return Row.noData, Row.noData, Row.noData, Row.noData, Row.noData, Row.noData, Row.noData, Row.noData
     
     def formatPrice(price, units):
         formattedPrice = "${:.2f}/{}".format(price, units)
@@ -122,7 +136,7 @@ class Row:
             averagePriceRaw = averageResult[Row.firstRow][Row.pricePosition]
             unitsRaw = averageResult[Row.firstRow][Row.unitPosition]
         elif numRowResults == 0:
-            averagePricePerUnit = "N/A"
+            averagePricePerUnit = Row.noData
             averagePriceRaw = defaultPrice
             unitsRaw = defaultUnits
         elif numRowResults > 1:
@@ -167,6 +181,9 @@ class Row:
         else:
             return averagePricePerUnit
     
+    def handleUncommonUnits(itemName):
+        pass
+    
     def getMostCommonUnit(unitList, dataList):
         maxUnitCount = 0
         unitCount = 0
@@ -178,26 +195,29 @@ class Row:
             if unitCount > maxUnitCount:
                 maxUnitCount = unitCount
                 maxUnit = unit     ## Most common unit
+                unitCount = 0
                 
         return maxUnit
     
     def convertLeastCommonUnits(mostCommonUnit, dataList):
         ureg = UnitRegistry()
         Q_ = ureg.Quantity
-        rowCount = 0
         convertedDataList = []
 
         for row in dataList:
             price = row[0]
             units = row[1]
-            if units != mostCommonUnit:
-                convertDivisor = Q_(1, units)
-                convertDivisor.ito(mostCommonUnit)
-                convertedPrice = price / convertDivisor.magnitude                
-                convertedDataList.append(convertedPrice)
-            else:
-                convertedDataList.append(price)
-            rowCount += 1
+            
+            try:
+                if units != mostCommonUnit:
+                    convertDivisor = Q_(1, units)
+                    convertDivisor.ito(mostCommonUnit)
+                    convertedPrice = price / convertDivisor.magnitude                
+                    convertedDataList.append(convertedPrice)
+                else:
+                    convertedDataList.append(price)
+            except:
+                pass
         
         return convertedDataList             
     
