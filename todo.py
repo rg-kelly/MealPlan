@@ -7,6 +7,7 @@ TODO:
   and another use case is that then items that I want to enter prices for but
   didn't actually buy won't affect the inventory
 -- When choose main dish, auto select sides based on most common pairing
+~~ Configure ingredients screen doesn't come up again if you try to access again after closing
 - Store extra reminder (True/False and length) info in db instead of hard code in calendar.py
 - Copy from week feature for meal plan. Can copy meal assignments from a previous week to current one...
 - Generate shopping list button on meal plan tab. That would display all ingredients needed (and prices?). Could edit prices/amounts and then generate budget prediction.
