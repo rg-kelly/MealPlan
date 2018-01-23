@@ -20,4 +20,5 @@ report = Report.createNewReport()
 # Issues:
 # - 'non-convertible' units like unit, piece, strip and pint
 # - need to handle units not being same for all price types, not just avg
-#   because otherwise the diff of units makes max/min not accurate
+#   because otherwise the diff of units makes max/min not accurate (made
+#   text color white in report so it won't show for now until this is fixed)
