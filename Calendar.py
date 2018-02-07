@@ -86,7 +86,7 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
                 updated_event = service.events().update(calendarId=mealCalendarId, eventId=event['id'], body=event).execute()
                 #print(updated_event['updated'])
             else:
-                print("====== Summary did not change - nothing to do here ======")        
+                print("====== Summary did not change - nothing to do in Calendar ======")        
                 
     elif not events and not newSummaryIsNone:
         eventBody = {"summary": summaryParam,

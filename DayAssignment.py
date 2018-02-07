@@ -107,7 +107,7 @@ class DayAssignment:
             connection.updateData(updateQuery, updateBindingVariable)            
             connection.closeConnection()
         
-            print("Successfully updated the meal for {}".format(self.dayName))
+            print("Successfully updated the meal in DB for {}".format(self.dayName))
             print(self)
             
         else:
