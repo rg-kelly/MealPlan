@@ -65,7 +65,7 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
     events = eventsResult.get('items', [])    
     newSummaryIsNone = (summaryParam == "")
     defaultExtraReminder = {'useDefault': False, 'overrides': [{'minutes': 540, 'method': 'popup'}, {'minutes': 30, 'method': 'popup'}]}
-    
+
     if events:
         print(events)
         if newSummaryIsNone:

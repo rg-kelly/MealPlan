@@ -135,6 +135,10 @@ def getProjectedGroceryBill(weekOfDate):
     defaultPrice = 0
     projectedPrice = 0
     
+    if ingredientsList is None: ## Handle scenario where no meals are assigned yet
+        ingredientsList = []
+        projectedPrice = 0
+        
     for item in ingredientsList:
         ingredientName = item[0]
         amount = item[1]
@@ -362,7 +366,7 @@ def pressIngredientAdd(btn):
     app.removeButton(ingredientsDoneButtonUnique)
     addIngredientEntries(amountLabel=getNumberedAmountLabel(currentRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(currentRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(currentRow), startRow=currentRow)
     app.addNamedButton(ingredientsDoneButton, ingredientsDoneButtonUnique, press, row = currentRow + 1, column=0, colspan=4)
-    
+
     global addToCurrentRow
     addToCurrentRow += 1
     
@@ -614,7 +618,8 @@ def checkEntriesForCalendar(day, weekOfDate, mainDishInput, sideAInput, sideBInp
             
     if assignmentHasChanged:
         if app.getCheckBox("Update"):
-            addToCalendar(day, weekOfDate, summary)
+            #addToCalendar(day, weekOfDate, summary)
+            pass
         else:
             print("Calendar will not be changed because update checkbox is not ticked in settings")
     
