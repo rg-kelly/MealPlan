@@ -51,7 +51,7 @@ def get_credentials():
         print('Storing credentials to ' + credential_path)
     return credentials
 
-def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.now(), dateFormat), start = "5:00", end = "6:00"):
+def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.now(), dateFormat), start = "5:30", end = "6:30"):
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('calendar', 'v3', http=http, developerKey='complete-road-172122')
@@ -69,14 +69,14 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
     if events:
         print(events)
         if newSummaryIsNone:
-            print("====== Deleting existing event ======")
+            print("====== Deleting existing event {} ======".format(summaryParam))
             service.events().delete(calendarId=mealCalendarId, eventId=events[0].get('id', None)).execute()
         else:
             event = service.events().get(calendarId=mealCalendarId, eventId=events[0].get('id', None)).execute()
             currentSummary = event.get('summary', None)
             
             if currentSummary != None and currentSummary != summaryParam:            
-                print("====== Updating existing event ======")
+                print("====== Updating existing event to {} ======".format(summaryParam))
                 event['summary'] = summaryParam
                 
                 if checkIfMealNeedsExtraReminder(summaryParam):
@@ -84,24 +84,26 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
                     event['reminders'] = defaultExtraReminder                
                 
                 updated_event = service.events().update(calendarId=mealCalendarId, eventId=event['id'], body=event).execute()
-                #print(updated_event['updated'])
+                print(updated_event['updated'])
             else:
                 print("====== Summary did not change - nothing to do in Calendar ======")        
                 
     elif not events and not newSummaryIsNone:
         eventBody = {"summary": summaryParam,
-         "start": {"dateTime": "{}T1{}:00-08:00".format(date, start)}, # 7:00 from March to Nov
-         "end": {"dateTime": "{}T1{}:00-08:00".format(date, end)}}     # 8:00 from Nov to March (Daylight savings related...)
+         "start": {"dateTime": "{}T1{}:00-07:00".format(date, start)}, # 7:00 from March to Nov
+         "end": {"dateTime": "{}T1{}:00-07:00".format(date, end)}}     # 8:00 from Nov to March (Daylight savings related...)
         
         if checkIfMealNeedsExtraReminder(summaryParam):
             print("************ Adding extra reminder...")
             eventBody['reminders'] = defaultExtraReminder
         
         event = service.events().insert(calendarId=mealCalendarId, body=eventBody).execute()
-        print("====== Event created ======")
+        print("====== {} event created ======".format(summaryParam))
 
     elif not events and newSummaryIsNone:
         print("====== No current events and no new summary is provided - nothing to do here ======")
+        
+    print("\n")
     
 def checkIfMealNeedsExtraReminder(mealName):
     extraReminderRecipeList = ["Pulled pork"]

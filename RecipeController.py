@@ -592,14 +592,14 @@ def pressRecipeAssign():
     except:
         app.errorBox("ERROR", "Error occurred during recipe assignment. See console log for details.")
 
-    print("********************************************")
-    projectedBill = getProjectedGroceryBill(getDateEntry())
-    print(projectedBill)
-    print("********************************************\n")
-    displayProjectedGroceryBill(app, projectedBill)
+    #print("********************************************")
+    #projectedBill = getProjectedGroceryBill(getDateEntry())
+    #print(projectedBill)
+    #print("********************************************\n")
+    #displayProjectedGroceryBill(app, projectedBill)
     
-    for i in range(2):
-        print("=====================================")    
+    #for i in range(2):
+        #print("=====================================")    
     
 def updateAssignment(day, mainDishInput, sideAInput, sideBInput):
     dayObject = DayAssignment.getExistingDay(getDateEntry(), day)
@@ -618,8 +618,7 @@ def checkEntriesForCalendar(day, weekOfDate, mainDishInput, sideAInput, sideBInp
             
     if assignmentHasChanged:
         if app.getCheckBox("Update"):
-            #addToCalendar(day, weekOfDate, summary)
-            pass
+            addToCalendar(day, weekOfDate, summary)
         else:
             print("Calendar will not be changed because update checkbox is not ticked in settings")
     
