@@ -7,7 +7,8 @@ TODO:
   and another use case is that then items that I want to enter prices for but
   didn't actually buy won't affect the inventory
 -- When choose main dish, auto select sides based on most common pairing
-~~ Configure ingredients screen doesn't come up again if you try to access again after closing
+~~~~~ Make amount label on configure ingredients window to be unique -- currently throwing error if access that window for more than one recipe.
+~ Verify that calculations are accurate for report (esp. min/max values)
 - Store extra reminder (True/False and length) info in db instead of hard code in calendar.py
 - Copy from week feature for meal plan. Can copy meal assignments from a previous week to current one...
 - Generate shopping list button on meal plan tab. That would display all ingredients needed (and prices?). Could edit prices/amounts and then generate budget prediction.
@@ -19,7 +20,7 @@ TODO:
 - Streamline casing for ingredients added to db and update current ones to fit. First letter capped and all the rest lower.
 ~ Errors with recipe add query are not creating ui pop-up
 - On date go, add column for calendar events that would affect meals
-- Lunch and breakfast capabilities
+- Lunch and breakfast and snacks capabilities
 - Add recipes to 'cookbook' in slides (attribute in recipe table for distinguishing dessert from main from soup...)
 - Ability to switch meals from one day to another
 """

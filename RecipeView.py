@@ -122,7 +122,7 @@ def configureGui(app, handleOptionBox, press):
     app.setEntryDefault(newDateEntryLabel, "yyyy-mm-dd")
     app.addButton("Go", press, row = dateRow, column = goButtonColumn)
     
-    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", assignRecipesTab)
+    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", addRecipesTab)
     
 def displayProjectedGroceryBill(app, projection):
     formattedProjection = "${:.2f}".format(projection)
