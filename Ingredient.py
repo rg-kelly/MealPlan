@@ -11,7 +11,7 @@ class Ingredient:
     amountOnHandColumn = "Amount_On_Hand"
 
     def __init__(self, ingredientName, averagePricePerUnit = 1.00):
-        self.ingredientName = ingredientName     
+        self.ingredientName = Utilities.normalizeCasing(ingredientName)
         self.averagePricePerUnit = averagePricePerUnit
         #self.amountOnHand = amountOnHand
 
