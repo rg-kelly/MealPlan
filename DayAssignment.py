@@ -113,7 +113,7 @@ class DayAssignment:
         else:
             print("Meal assignment didn't change for {} -- nothing to do here".format(self.dayName))
     
-    def updateRecipeList(weekOfDate, dayOfWeek, recipeList, isSide = False):
+    def reorderRecipeList(weekOfDate, dayOfWeek, recipeList, isSide = False):
         isSideA = (dayOfWeek.__contains__(Recipe.sideALabelPrefix))
         isSideB = (dayOfWeek.__contains__(Recipe.sideBLabelPrefix))
         
