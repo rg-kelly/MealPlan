@@ -34,7 +34,7 @@ class Recipe:
 
     def __init__(self, recipeId, recipeName, recipeType, cookbookType, ingredients, description):
         self.recipeId = recipeId
-        self.recipeName = recipeName
+        self.recipeName = Utilities.normalizeCasing(recipeName)
         self.recipeType = recipeType
         self.cookbookType = cookbookType
         self.ingredients = ingredients
@@ -95,7 +95,7 @@ class Recipe:
             #connection.updateData(bridgeQuery, bridgeInsertValues)
         
         connection.closeConnection()
-        print("Successfully added " + "'" + self.recipeName + "' " + "recipe")
+        print("Successfully added " + "'" + self.recipeName + "' " + "recipe.")
         
     def update(self, newRecipeName, newRecipeType, newCookbookType, newIngredientsList, newDescription, updateIngredients = True):
         queryList = []
