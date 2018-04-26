@@ -20,7 +20,6 @@ Q_ = ureg.Quantity
 
 app = gui("Meal Plan Configuration")
 app.setLogLevel("ERROR")
-#app.setIcon(".\icon.gif")
 
 dateFormat = "%Y-%m-%d"
 timeFormat = "%I:%M"
@@ -33,6 +32,7 @@ cancelButtonSuffix = "__cancelButton"
 ingredientRowSymbol = "@"
 addToCurrentRow = 0
 windowTitleUniqueHiddenLabel = "ID"
+projectBill = False
 
 import ctypes
 ctypes.windll.user32.ShowWindow( ctypes.windll.kernel32.GetConsoleWindow(), 6 )
@@ -61,7 +61,7 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
     if nameColumn != WeekOfDate.dateNameColumn or labelName == weekOfDatePurchaseSelectionLabel:
         optionsList = listOptions(nameColumn, tableName, True)        
     if nameColumn == Recipe.recipeNameColumn and labelName.__contains__("day"):
-        optionsList = DayAssignment.updateRecipeList(getDateEntry(), labelName, optionsList, isSide)
+        optionsList = DayAssignment.reorderRecipeList(getDateEntry(), labelName, optionsList, isSide)
     elif nameColumn == WeekOfDate.dateNameColumn and labelName != weekOfDatePurchaseSelectionLabel:
         optionsList = WeekOfDate.findClosestWeekOfDate(listOptions=True)
         optionsList.insert(0, newOption)
@@ -247,7 +247,8 @@ def destroyRecipeWindow(btn):
         
     try:  ## Won't work if user never entered any ingredients
         app.destroySubWindow(uniqueIngredientsWindowTitle) 
-    except: print("No window to destroy because user must not have entered any ingredients.")
+    except:
+        print("No window to destroy because user must not have entered any ingredients.")
     
     destroySubwindow(btn, suffix)
     
@@ -282,7 +283,7 @@ def pressIngredientsDone():
                     ingredient.add()
                     handleOptionBox(ingredientSelectionPriceLabel, "update", Ingredient.Ingredient.ingredientNameColumn, Ingredient.Ingredient.ingredientTable, row = headingRow + 1, column = pricesColumnStart)
                     
-                    message = "Successfully added new ingredient '{}'!".format(ingredientName)
+                    message = "Successfully added new ingredient '{}'.".format(ingredient.ingredientName)
                     
                 elif not isNewIngredient:
                     message = "Ingredient '{}' already exists.".format(ingredientName)
@@ -293,7 +294,8 @@ def pressIngredientsDone():
     app.hideSubWindow(uniqueIngredientsWindowTitle)
 
 def getNumberedAmountLabel(row):
-    numberedAmountLabel = str(row) + ". "
+    numberedAmountLabel = amountEntryLabel + uniqueLabel + str(row)
+    
     return numberedAmountLabel
 
 def pressConfigureIngredients():
@@ -321,7 +323,7 @@ def pressConfigureIngredients():
                     unitsLabel = amountUnitsLabel + uniqueLabel + str(ingredientStartRow)
                     ingredientNameLabel = ingredientEntryLabel + uniqueLabel + str(ingredientStartRow)
                     
-                    addIngredientEntries(amountLabel, unitsLabel, ingredientNameLabel, startRow=ingredientStartRow)
+                    addIngredientEntries(amountLabel, unitsLabel, ingredientNameLabel, startRow=ingredientStartRow, amountEntryHasLabel=False)
                     app.setEntry(amountLabel, ingredient['amount'])
                     app.setOptionBox(unitsLabel, ingredient['units'])
                     app.setEntry(ingredientNameLabel, ingredient['name'])
@@ -329,10 +331,10 @@ def pressConfigureIngredients():
                     ingredientStartRow += 1
                 app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow - len(recipe.ingredients), column=3)
             else:
-                addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow)
+                addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow, amountEntryHasLabel=False)
                 app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
         elif isNewRecipe:
-            addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow)
+            addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow, amountEntryHasLabel=False)
             app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
         
         app.addNamedButton(ingredientsDoneButton, ingredientsDoneButtonUnique, pressIngredientsDone, row = ingredientStartRow + 1, column=0, colspan=4)
@@ -351,7 +353,7 @@ def pressPurchaseEnter():
     store = app.getOptionBox(storeSelectionLabel)
     weekOfDate = app.getOptionBox(weekOfDatePurchaseSelectionLabel)
     multiplier = int(app.getEntry(multiplierEntry))
-    notes = "" # TODO: Entry spot for notes
+    notes = "" ## TODO: Entry spot for notes
     
     for element in range(multiplier):
         newPurchase = Purchase_History.createNewPurchase(ingredientName, amount, units, purchasePrice, store, weekOfDate, notes)
@@ -373,7 +375,7 @@ def pressIngredientAdd(btn):
     
     app.openSubWindow(uniqueIngredientsWindowTitle)
     app.removeButton(ingredientsDoneButtonUnique)
-    addIngredientEntries(amountLabel=getNumberedAmountLabel(currentRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(currentRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(currentRow), startRow=currentRow)
+    addIngredientEntries(amountLabel=getNumberedAmountLabel(currentRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(currentRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(currentRow), startRow=currentRow, amountEntryHasLabel=False)
     app.addNamedButton(ingredientsDoneButton, ingredientsDoneButtonUnique, pressIngredientsDone, row = currentRow + 1, column=0, colspan=4)
     app.stopSubWindow()
     
@@ -426,7 +428,7 @@ def pressSettingsUpdate():
         newDictionary = {dinnerKey: {startKey: dinnerStart, endKey: dinnerEnd}, updateKey: updateCalendar}
         existingSettings.updateExistingSettings(newDictionary)
         
-        message = "Successfully updated the settings!"
+        message = "Successfully updated the settings."
         app.info(message)
         app.infoBox("Success", message)
     except:
@@ -437,8 +439,12 @@ def pressSettingsUpdate():
 def validateRecipeName(recipeName):
     return True   
 
-def addIngredientEntries(amountLabel, unitsLabel, ingredientNameLabel, startRow):
-    app.addLabelEntry(amountLabel, row=startRow, column=0)
+def addIngredientEntries(amountLabel, unitsLabel, ingredientNameLabel, startRow, amountEntryHasLabel = True):
+    if amountEntryHasLabel:
+        app.addLabelEntry(amountLabel, row = startRow, column = 0)
+    else:
+        app.addEntry(amountLabel, row = startRow, column = 0)
+        
     handleOptionBox(unitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.isSingularWhereClause, startRow, 1)
     app.addEntry(ingredientNameLabel, row = startRow, column = 2)    
 
@@ -544,7 +550,10 @@ def updateDateList(newEntry):
 
 def updateRecipeList(newRecipeName):
     updateDropDownList(newRecipeName, recipeSelectionLabel, Recipe.recipeNameColumn, Recipe.recipeTable, row=dateRow, column=recipeSelectionColumn)
-    configureRecipeDropDowns(actionType="update")
+    try:
+        configureRecipeDropDowns(actionType="update")
+    except:
+        print("Won't update recipe drop downs for meal plan because no plans have been pulled up yet.")
 
 def getActionType(tabType = assignRecipesTab):
     if tabType == assignRecipesTab:
@@ -597,19 +606,20 @@ def pressRecipeAssign():
         
             updateAssignment(day, mainDishInput, sideAInput, sideBInput)
         
-        app.infoBox("Success", "Successfully updated recipe assignments!")
+        app.infoBox("Success", "Successfully updated recipe assignments.")
         
     except:
         app.errorBox("ERROR", "Error occurred during recipe assignment. See console log for details.")
 
-    #print("********************************************")
-    #projectedBill = getProjectedGroceryBill(getDateEntry())
-    #print(projectedBill)
-    #print("********************************************\n")
-    #displayProjectedGroceryBill(app, projectedBill)
-    
-    #for i in range(2):
-        #print("=====================================")    
+    if projectBill == True:
+        print("********************************************")
+        projectedBill = getProjectedGroceryBill(getDateEntry())
+        print(projectedBill)
+        print("********************************************\n")
+        displayProjectedGroceryBill(app, projectedBill)
+        
+        for i in range(2):
+            print("=====================================")    
     
 def updateAssignment(day, mainDishInput, sideAInput, sideBInput):
     dayObject = DayAssignment.getExistingDay(getDateEntry(), day)
@@ -637,7 +647,5 @@ def addToCalendar(day, dateEntry, summary):
     dateDict[day] = datetime.strftime(datetime.strptime(dateEntry, dateFormat) + timedelta(days=daysOfWeek.index(day)), dateFormat) 
     Calendar.main(summary, dateDict[day], app.getEntry(startLabelDinner), app.getEntry(endLabelDinner))
 
-#print(getIngredientPrice("Bacon", 16, "oz"))
-#print(getProjectedGroceryBill('2017-10-02'))
 configureGui(app, handleOptionBox, press)
 app.go()
