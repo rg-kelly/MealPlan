@@ -1,36 +1,19 @@
 from DataConnection import DataConnection
 
-# These methods are written in a class-neutral way so that any class can utitilize them
-
-# ----- DEPRECATED -----
-# Use getKnownInfo instead
-# Method for getting the primary key value for a user-entered value
-def getKeyFromValue(descriptionValue, descriptionColumnName, idColumnName, tableName, descriptionIsInteger = False):
-    done = False
-    idValuePosition = 0
-    
-    while not done: 
-        connection = DataConnection()
-        query = "SELECT " + idColumnName + " FROM " + tableName + " WHERE " + descriptionColumnName + " = "
-        
-        if descriptionIsInteger: query += str(descriptionValue)
-        else: query += "'" + descriptionValue + "'"
-
-        result = connection.runQuery(query)
-        idValue = result.fetchone()
-        result.close()
-        connection.closeConnection()
-
-        if (idValue != None):
-            done = True
-            return str(idValue[idValuePosition]), descriptionValue
-        else:
-            descriptionValue = handleInvalidEntry(descriptionValue, tableName)
+## These methods are written in a class-neutral way so that any class can utitilize them
 
 def extractDayName(labelName):
     dayOfWeek = labelName.split("_")[2]
     
     return dayOfWeek
+
+def normalizeCasing(userInput):
+    if userInput:
+        adjustedString = userInput[0].upper() + userInput[1:].lower()
+    else:
+        adjustedString = userInput
+    
+    return adjustedString
 
 def getKnownInfo(knownInfo, selectColumn, whereColumn, table, whereColumnIsInteger = False):
     infoPosition = 0    
@@ -48,7 +31,7 @@ def getKnownInfo(knownInfo, selectColumn, whereColumn, table, whereColumnIsInteg
     if info != None: return info[infoPosition]
     else: return None
 
-# Method for calculating new primary key values based on the currently highest value
+## Method for calculating new primary key values based on the currently highest value
 def generateNewKey(idColumn, tableName):
     idValuePosition = 0
     incrementValue = 1
@@ -67,7 +50,7 @@ def generateNewKey(idColumn, tableName):
         return newKey
     else: return None
 
-def listOptions(nameColumn, tableName, returnList = False, orderByClause = ""): # Method for displaying all of the possible input options currently available
+def listOptions(nameColumn, tableName, returnList = False, orderByClause = ""): ## Method for displaying all of the possible input options currently available
     listOfOptions = []
     namePosition = 0
     connection = DataConnection()
@@ -89,3 +72,28 @@ def listOptions(nameColumn, tableName, returnList = False, orderByClause = ""): 
     else: print("There are currently no options to list.")
 
     if returnList: return listOfOptions
+
+## ----- DEPRECATED -----
+## Use getKnownInfo instead
+## Method for getting the primary key value for a user-entered value
+def getKeyFromValue(descriptionValue, descriptionColumnName, idColumnName, tableName, descriptionIsInteger = False):
+    done = False
+    idValuePosition = 0
+    
+    while not done: 
+        connection = DataConnection()
+        query = "SELECT " + idColumnName + " FROM " + tableName + " WHERE " + descriptionColumnName + " = "
+        
+        if descriptionIsInteger: query += str(descriptionValue)
+        else: query += "'" + descriptionValue + "'"
+
+        result = connection.runQuery(query)
+        idValue = result.fetchone()
+        result.close()
+        connection.closeConnection()
+
+        if (idValue != None):
+            done = True
+            return str(idValue[idValuePosition]), descriptionValue
+        else:
+            descriptionValue = handleInvalidEntry(descriptionValue, tableName)
