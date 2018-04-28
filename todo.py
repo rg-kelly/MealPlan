@@ -1,11 +1,12 @@
 """
-TODO:
+TO DO:
 - Ability to delete ingredients from recipe
 - On date go, add column for calendar events that would affect meals
 - Generate shopping list button on meal plan tab. That would display all ingredients needed (and prices?). Could edit prices/amounts and then generate budget prediction.
 - Store extra reminder (True/False and length) info in db instead of hard code in calendar.py
 - Verify that calculations are accurate for report (esp. min/max values)
 - Alpha order the recipes on the meal plan tab
+- Automatically generate meal plan (check calendar for night time events over dinner hour and go off baseline meal plan like as in sheets etc)
   #####
 - Add 'add to inventory' check box for enter prices screen, then don't have to enter
   price but just amount and ingredient so that the pantry inventory is accurate
