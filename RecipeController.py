@@ -43,12 +43,12 @@ def addRecipe(recipeName, recipeType, cookbookType, description):
     
     app.infoBox(recipeName, "Successfully added new recipe!\n\n{}".format(str(recipe)))
     
-def updateRecipe(recipeName, recipeType, cookbookType, description):
-    recipe = Recipe.getExistingRecipe(recipeName=recipeName, recipeId=False)
-    updateStatus = recipe.update(recipeName, recipeType, cookbookType, ingredientsList, description, updateIngredients=ingredientsHaveChanged)
+def updateRecipe(recipeNameLookup, recipeType, cookbookType, description, recipeNameInput):
+    recipe = Recipe.getExistingRecipe(recipeName=recipeNameLookup, recipeId=False)
+    updateStatus = recipe.update(recipeNameInput, recipeType, cookbookType, ingredientsList, description, updateIngredients=ingredientsHaveChanged)
 
-    if updateStatus == True: app.infoBox(recipeName, "Successfully updated recipe!\n\n{}".format(str(recipe)))
-    elif updateStatus != False: app.errorBox(recipeName, "Error occurred while updating recipe. {}".format(updateStatus))
+    if updateStatus == True: app.infoBox(recipeNameInput, "Successfully updated recipe!\n\n{}".format(str(recipe)))
+    elif updateStatus != False: app.errorBox(recipeNameInput, "Error occurred while updating recipe. {}".format(updateStatus))
 
 def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultRow, column = defaultColumn):
     isAdd = (actionType == "add")
@@ -295,8 +295,11 @@ def pressIngredientsDone():
 
 def getNumberedAmountLabel(row):
     numberedAmountLabel = amountEntryLabel + uniqueLabel + str(row)
-    
     return numberedAmountLabel
+
+def getRecipeNameEntryKey():
+    recipeNameEntryKey = recipeNameEntryTitle + "_" + uniqueLabel
+    return recipeNameEntryKey
 
 def pressConfigureIngredients():
     try:
@@ -383,20 +386,21 @@ def pressIngredientAdd(btn):
     addToCurrentRow += 1
     
 def pressRecipeSubmit():
-    recipeName = pressRecipeGo(returnName=True)
-    isNewRecipe = (getKnownInfo(recipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)
+    goRecipeName = pressRecipeGo(returnName=True)
+    isNewRecipe = (getKnownInfo(goRecipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)    
 
     recipeType = app.getOptionBox(recipeTypeLabel + uniqueLabel)
     cookbookType = app.getOptionBox(recipeCookbookTypeLabel + uniqueLabel)
     description = app.getTextArea(recipeTextBoxLabel + uniqueLabel)        
     if description == "": description = None    
 
+    recipeNameInput = app.getEntry(getRecipeNameEntryKey())
     if isNewRecipe:
-        addRecipe(recipeName, recipeType, cookbookType, description)
-        updateRecipeList(recipeName)
+        addRecipe(recipeNameInput, recipeType, cookbookType, description)
         app.clearEntry(newRecipeEntryLabel)        
     else:
-        updateRecipe(recipeName, recipeType, cookbookType, description)
+        updateRecipe(goRecipeName, recipeType, cookbookType, description, recipeNameInput)
+    updateRecipeList(recipeNameInput)
     
     global ingredientsList
     ingredientsList = []
@@ -469,15 +473,19 @@ def pressRecipeGo(returnName = False):
     else:
         windowTitlePrefix = "Update"
     
-    windowTitle = "{} Recipe: {}".format(windowTitlePrefix, recipeName)
+    windowTitle = "{} Recipe: ".format(windowTitlePrefix, recipeName)
     windowTitleUnique = windowTitle + uniqueLabel
 
     app.startSubWindow(name=windowTitleUnique, title=windowTitle, modal=True)
     app.addLabel(windowTitleUniqueHiddenLabel, windowTitleUnique)
     app.hideLabel(windowTitleUniqueHiddenLabel)
-    app.addLabel(windowTitleUnique, windowTitle, row=headingRow, column=0, colspan=4)
+    app.addLabel(windowTitleUnique, windowTitle, row=headingRow, column=1, colspan=2)
     app.setLabelFg(windowTitleUnique, "white")
     app.setLabelBg(windowTitleUnique, "gray")
+    
+    recipeEntryKey = getRecipeNameEntryKey()
+    app.addEntry(recipeEntryKey, row=headingRow, column=3)
+    app.setEntry(recipeEntryKey, recipeName)
     
     app.addLabel(recipeTypeLabel + "_" + uniqueLabel, recipeTypeLabel, row = headingRow + 1, column=0)
     handleOptionBox(recipeTypeLabel + uniqueLabel, "add", Recipe.typeNameColumn, Recipe.typeTable + " WHERE {0} = {1}".format(Recipe.isCookbookColumn, Recipe.isNotCookbook), headingRow+1, 1)

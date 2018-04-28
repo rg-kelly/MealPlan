@@ -41,6 +41,7 @@ ingredientsWindowTitle = configureIngredientsButton
 ingredientsDoneButton = "Done"
 priceEnterButton = "Enter"
 priceAutoFillButton = "Auto Fill"
+recipeNameEntryTitle = "recipeNameEntryTitle"
 multiplierEntry = "  x"
 defaultMultiplier = "1"
 
