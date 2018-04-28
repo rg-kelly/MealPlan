@@ -129,6 +129,7 @@ class DayAssignment:
             recipeName = mealAssignment.mainDish
         
         if recipeList.__contains__(recipeName):
+            recipeList.sort()
             recipeList.insert(0, recipeList.pop(recipeList.index(recipeName)))
         else:
             print("WARNING: Recipe list '{}' did not contain recipe called '{}'".format(recipeList, recipeName))
