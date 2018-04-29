@@ -326,19 +326,22 @@ def pressConfigureIngredients():
                     unitsLabel = amountUnitsLabel + uniqueLabel + str(ingredientStartRow)
                     ingredientNameLabel = ingredientEntryLabel + uniqueLabel + str(ingredientStartRow)
                     
-                    addIngredientEntries(amountLabel, unitsLabel, ingredientNameLabel, startRow=ingredientStartRow, amountEntryHasLabel=False)
+                    handleIngredientEntry(amountLabel, unitsLabel, ingredientNameLabel, startRow=ingredientStartRow, amountEntryHasLabel=False)
                     app.setEntry(amountLabel, ingredient['amount'])
                     app.setOptionBox(unitsLabel, ingredient['units'])
                     app.setEntry(ingredientNameLabel, ingredient['name'])
     
                     ingredientStartRow += 1
-                app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow - len(recipe.ingredients), column=3)
+                app.addNamedButton(ingredientAddButtonDisplay, ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow - len(recipe.ingredients), column=3)
+                app.addNamedButton(ingredientDeleteButtonDisplay, ingredientDeleteButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), pressIngredientDelete, row=ingredientStartRow - len(recipe.ingredients) + 1, column=3)
             else:
-                addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow, amountEntryHasLabel=False)
-                app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
+                handleIngredientEntry(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow, amountEntryHasLabel=False)
+                app.addNamedButton(ingredientAddButtonDisplay, ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
+                app.addNamedButton(ingredientDeleteButtonDisplay, ingredientDeleteButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), pressIngredientDelete, row=ingredientStartRow + 1, column=3)
         elif isNewRecipe:
-            addIngredientEntries(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow, amountEntryHasLabel=False)
-            app.addNamedButton("Add", ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
+            handleIngredientEntry(amountLabel=getNumberedAmountLabel(ingredientStartRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(ingredientStartRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(ingredientStartRow), startRow=ingredientStartRow, amountEntryHasLabel=False)
+            app.addNamedButton(ingredientAddButtonDisplay, ingredientAddButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), press, row=ingredientStartRow, column=3)                
+            app.addNamedButton(ingredientDeleteButtonDisplay, ingredientDeleteButton + uniqueLabel + ingredientRowSymbol + str(ingredientStartRow), pressIngredientDelete, row=ingredientStartRow + 1, column=3)
         
         app.addNamedButton(ingredientsDoneButton, ingredientsDoneButtonUnique, pressIngredientsDone, row = ingredientStartRow + 1, column=0, colspan=4)
         app.stopSubWindow()
@@ -367,24 +370,42 @@ def pressPurchaseEnter():
     app.clearEntry(amountPaidLabel)
     app.setEntry(multiplierEntry, defaultMultiplier)
     app.setFocus(amountPurchasedLabel)
-        
-def pressIngredientAdd(btn):
+
+def getCurrentRow(buttonName):
     ingredientWindowStartRow = 1
 
-    if btn.__contains__(ingredientRowSymbol):
-        currentRow = int(btn.split(ingredientRowSymbol)[1])
+    if buttonName.__contains__(ingredientRowSymbol):
+        currentRow = int(buttonName.split(ingredientRowSymbol)[1])
         if currentRow == ingredientWindowStartRow: currentRow += 1
         currentRow += addToCurrentRow
+        return currentRow
+    else:
+        return None
+
+def pressIngredientAdd(btn):
+    currentRow = getCurrentRow(btn)
+    if currentRow is not None:
+        app.openSubWindow(uniqueIngredientsWindowTitle)
+        app.removeButton(ingredientsDoneButtonUnique)
+        handleIngredientEntry(amountLabel=getNumberedAmountLabel(currentRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(currentRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(currentRow), startRow=currentRow, amountEntryHasLabel=False)
+        app.addNamedButton(ingredientsDoneButton, ingredientsDoneButtonUnique, pressIngredientsDone, row = currentRow + 1, column=0, colspan=4)
+        app.stopSubWindow()
+        
+        global addToCurrentRow
+        addToCurrentRow += 1
+
+def pressIngredientDelete(btn):
+    currentRow = getCurrentRow(btn) - 1
+    if currentRow is not None:
+        app.openSubWindow(uniqueIngredientsWindowTitle)
+        app.removeButton(ingredientsDoneButtonUnique)
+        handleIngredientEntry(amountLabel=getNumberedAmountLabel(currentRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(currentRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(currentRow), startRow=currentRow, amountEntryHasLabel=False, action = "delete")
+        app.addNamedButton(ingredientsDoneButton, ingredientsDoneButtonUnique, pressIngredientsDone, row = currentRow, column=0, colspan=4)
+        app.stopSubWindow()
     
-    app.openSubWindow(uniqueIngredientsWindowTitle)
-    app.removeButton(ingredientsDoneButtonUnique)
-    addIngredientEntries(amountLabel=getNumberedAmountLabel(currentRow), unitsLabel=amountUnitsLabel + uniqueLabel + str(currentRow), ingredientNameLabel=ingredientEntryLabel + uniqueLabel + str(currentRow), startRow=currentRow, amountEntryHasLabel=False)
-    app.addNamedButton(ingredientsDoneButton, ingredientsDoneButtonUnique, pressIngredientsDone, row = currentRow + 1, column=0, colspan=4)
-    app.stopSubWindow()
-    
-    global addToCurrentRow
-    addToCurrentRow += 1
-    
+        global addToCurrentRow
+        addToCurrentRow -= 1
+
 def pressRecipeSubmit():
     goRecipeName = pressRecipeGo(returnName=True)
     isNewRecipe = (getKnownInfo(goRecipeName, Recipe.recipeIdColumn, Recipe.recipeNameColumn, Recipe.recipeTable, False) == None)    
@@ -443,14 +464,22 @@ def pressSettingsUpdate():
 def validateRecipeName(recipeName):
     return True   
 
-def addIngredientEntries(amountLabel, unitsLabel, ingredientNameLabel, startRow, amountEntryHasLabel = True):
-    if amountEntryHasLabel:
-        app.addLabelEntry(amountLabel, row = startRow, column = 0)
-    else:
-        app.addEntry(amountLabel, row = startRow, column = 0)
-        
-    handleOptionBox(unitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.isSingularWhereClause, startRow, 1)
-    app.addEntry(ingredientNameLabel, row = startRow, column = 2)    
+def handleIngredientEntry(amountLabel, unitsLabel, ingredientNameLabel, startRow, amountEntryHasLabel = True, action = "add"):
+    if action == "add":
+        if amountEntryHasLabel:
+            app.addLabelEntry(amountLabel, row = startRow, column = 0)
+        else:
+            app.addEntry(amountLabel, row = startRow, column = 0)
+        handleOptionBox(unitsLabel, "add", Amount_Units.unitNameColumn, Amount_Units.isSingularWhereClause, startRow, 1)
+        app.addEntry(ingredientNameLabel, row = startRow, column = 2)        
+    
+    elif action == "delete":
+        if amountEntryHasLabel:
+            app.removeLabelEntry(amountLabel)
+        else:
+            app.removeEntry(amountLabel)
+        app.removeOptionBox(unitsLabel)
+        app.removeEntry(ingredientNameLabel)
 
 def pressRecipeGo(returnName = False):
     recipeName, isManualEntry = getEntryLogic(recipeSelectionLabel, newRecipeEntryLabel, defaultEntry=app.getOptionBox(recipeSelectionLabel), validationFunction=validateRecipeName, errorMessage="", notifyIfManual=True)

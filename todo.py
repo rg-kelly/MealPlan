@@ -1,6 +1,5 @@
 """
 TO DO:
-- Ability to delete ingredients from recipe
 - On date go, add info for calendar events that would affect meals
 - Generate shopping list button on meal plan tab. That would display all ingredients needed (and prices?). Could edit prices/amounts and then generate budget prediction.
 - Store extra reminder (True/False and length) info in db instead of hard code in calendar.py
