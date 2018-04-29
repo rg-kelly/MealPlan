@@ -502,18 +502,18 @@ def pressRecipeGo(returnName = False):
     else:
         windowTitlePrefix = "Update"
     
-    windowTitle = "{} Recipe: ".format(windowTitlePrefix, recipeName)
+    windowTitle = "{} Recipe:".format(windowTitlePrefix, recipeName)
     windowTitleUnique = windowTitle + uniqueLabel
 
     app.startSubWindow(name=windowTitleUnique, title=windowTitle, modal=True)
     app.addLabel(windowTitleUniqueHiddenLabel, windowTitleUnique)
     app.hideLabel(windowTitleUniqueHiddenLabel)
-    app.addLabel(windowTitleUnique, windowTitle, row=headingRow, column=1, colspan=2)
+    app.addLabel(windowTitleUnique, windowTitle, row=headingRow, column=0, colspan=3)
     app.setLabelFg(windowTitleUnique, "white")
     app.setLabelBg(windowTitleUnique, "gray")
     
     recipeEntryKey = getRecipeNameEntryKey()
-    app.addEntry(recipeEntryKey, row=headingRow, column=3)
+    app.addEntry(recipeEntryKey, row=headingRow, column=2, colspan=2)
     app.setEntry(recipeEntryKey, recipeName)
     
     app.addLabel(recipeTypeLabel + "_" + uniqueLabel, recipeTypeLabel, row = headingRow + 1, column=0)
@@ -531,7 +531,7 @@ def pressRecipeGo(returnName = False):
         
         app.addLabel("Instructions:" + uniqueLabel, "Instructions:", row = ingredientStartRow + 2, column = 0)
         app.addScrolledTextArea(recipeTextBoxLabel + uniqueLabel, row = ingredientStartRow + 2, column = 0, colspan = 4)
-        app.addNamedButton("Update", windowTitleUnique + updateButtonSuffix, press, row = ingredientStartRow + 3, column=1, colspan=1)
+        app.addNamedButton("Update", windowTitleUnique + updateButtonSuffix, press, row = ingredientStartRow + 3, column = 1, colspan=1)
         app.addNamedButton("Delete", windowTitleUnique + deleteButtonSuffix, press, row = ingredientStartRow + 3, column = 2, colspan=1)
         
         app.setOptionBox(recipeTypeLabel + uniqueLabel, recipe.recipeType)
@@ -541,13 +541,13 @@ def pressRecipeGo(returnName = False):
     else:
         app.setOptionBox(recipeCookbookTypeLabel + uniqueLabel, "None")
         
-        app.addHorizontalSeparator(row = headingRow+2, column = 0, colspan = 4)
+        app.addHorizontalSeparator(row = headingRow+  2, column = 0, colspan = 4)
         app.addButton(configureIngredientsButton, press, row = headingRow + 3, column = 0, colspan=4)
-        app.addHorizontalSeparator(row = headingRow+5, column = 0, colspan = 4)        
+        app.addHorizontalSeparator(row = headingRow + 5, column = 0, colspan = 4)        
     
-        app.addLabel("Instructions:" + uniqueLabel, "Instructions:", row = headingRow+6, column = 0)
-        app.addScrolledTextArea(recipeTextBoxLabel + uniqueLabel, row = headingRow+6, column = 0, colspan = 4)
-        app.addNamedButton("Submit", windowTitleUnique + submitButtonSuffix, press, row=headingRow + 7, column=1, colspan=1)
+        app.addLabel("Instructions:" + uniqueLabel, "Instructions:", row = headingRow + 6, column = 0)
+        app.addScrolledTextArea(recipeTextBoxLabel + uniqueLabel, row = headingRow + 6, column = 0, colspan = 4)
+        app.addNamedButton("Submit", windowTitleUnique + submitButtonSuffix, press, row = headingRow + 7, column = 1, colspan=1)
         app.addNamedButton("Cancel", windowTitleUnique + cancelButtonSuffix, press, row = headingRow + 7, column = 2, colspan=1)
         
     app.stopSubWindow()
