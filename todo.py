@@ -6,6 +6,7 @@ TO DO:
 - Store extra reminder (True/False and length) info in db instead of hard code in calendar.py
 - Verify that calculations are accurate for report (esp. min/max values)
 - Automatically generate meal plan (check calendar for night time events over dinner hour and go off baseline meal plan like as in sheets etc)
+- Realign buttons on recipe edit screen
   #####
 - Add 'add to inventory' check box for enter prices screen, then don't have to enter
   price but just amount and ingredient so that the pantry inventory is accurate
