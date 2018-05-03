@@ -1,7 +1,7 @@
 """
 TO DO:
 - On date go, add info for calendar events that would affect meals
-- Generate shopping list button on meal plan tab. That would display all ingredients needed (and prices?). Could edit prices/amounts and then generate budget prediction.
+- Generate shopping list button on meal plan tab. That would display all ingredients needed (and prices?). Could edit prices/amounts and then generate budget prediction. Export to keep.
 - Store extra reminder (True/False and length) info in db instead of hard code in calendar.py
 - Verify that calculations are accurate for report (esp. min/max values)
 - Automatically generate meal plan (check calendar for night time events over dinner hour and go off baseline meal plan like as in sheets etc)
@@ -14,7 +14,7 @@ TO DO:
 - Copy from week feature for meal plan. Can copy meal assignments from a previous week to current one...
 - Order ingredients list in enter prices tab with most commonly used ones at top (order by most common use then alpha) and then alpha the rest
 - Leftovers box to check on meal plan screen for when meal will be using leftover ingredients from something made previous (and won't be counted for grocery bill)
-- Ingredient drop down for 'configure ingredients' screen? (Logic for not adding duplicate ingredients because of plurality... maybe use like query to try to catch and then throw a 'did you mean this' window for user to verify...)
+- Ingredient drop down for 'configure ingredients' screen? (Or else logic for not adding duplicate ingredients because of plurality... maybe use like query to try to catch and then throw a 'did you mean this' window for user to verify...)
 - Tab to display inventory for ingredients (basically ingredient info page -- price per unit / last 5 purchase history, inventory, recipes...)
 - Lunch and breakfast and snacks capabilities
 - Add recipes to 'cookbook' in slides (attribute in recipe table for distinguishing dessert from main from soup...)

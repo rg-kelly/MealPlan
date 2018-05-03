@@ -618,6 +618,7 @@ def getActionType(tabType = assignRecipesTab):
 def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideATableParameter = Recipe.whereSideTypeId, sideBTableParameter = Recipe.whereSideTypeId, actionType = "update"):    
     row = typeHeadingRow + 1
     column = defaultColumn
+    noneColumn = column + 3
     
     for day in daysOfWeek:            
         handleOptionBox(day, actionType, Recipe.recipeNameColumn, mainTableParameter, row, column)
@@ -625,14 +626,30 @@ def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideAT
         handleOptionBox(Recipe.sideBLabelPrefix + day, actionType, Recipe.recipeNameColumn, sideBTableParameter, row, column + 2)
         
         if actionType == "add":
-            app.addNamedButton("None", noneButtonLabel + "_" + day, press, row = row, column = column + 3)
+            app.addNamedButton(noneButtonLabel, noneButtonLabel + "_" + day, press, row = row, column = noneColumn)
         
         row += 1
 
     if actionType == "add":
         app.addButton("Submit", press, row = submitRow, column = 0, colspan = 4)
+        app.addNamedButton(generateListSymbol, generateGroceryListButtonLabel, pressGenerateGroceryList, row = submitRow, column = noneColumn)
         app.stopTab()
         app.stopTabbedFrame()
+
+def pressGenerateGroceryList():
+    weekOfDate = getDateEntry()
+    shoppingListWindowName = shoppingListWindowTitle + "_" + weekOfDate
+    
+    app.startSubWindow(name = shoppingListWindowName, title = shoppingListWindowTitle, modal = True)
+    
+    # display all ingredients needed, price per unit, amount needed.
+        # Issue - uniqueness in labels (i.e. ingred name)... should just have all entries? But not care if user tries to change ingredient name or other static info?
+    # Be able to edit prices/amounts and then generate budget prediction (Can set to zero if don't need any)
+    # Can add items manually like for snacks/breakfast
+    # Export to keep list    
+    
+    app.stopSubWindow()
+    app.showSubWindow(shoppingListWindowName)
 
 def pressRecipeAssign():
     try:

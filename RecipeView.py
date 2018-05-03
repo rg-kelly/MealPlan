@@ -17,6 +17,8 @@ recipeCookbookTypeLabel = "Cookbook Type "
 dateEntryLabel = "Week Of: "
 newDateEntryLabel = "Add: "
 noneButtonLabel = "None"
+generateGroceryListButtonLabel = "Generate Grocery List"
+generateListSymbol = ">>>" ## TODO: Replace with something more intuitive
 newIngredientLabel = "Ingredient Name "
 startLabelDinner = "Start: "
 endLabelDinner = "End: "
@@ -47,6 +49,8 @@ priceAutoFillButton = "Auto Fill"
 recipeNameEntryTitle = "recipeNameEntryTitle"
 multiplierEntry = "  x"
 defaultMultiplier = "1"
+
+shoppingListWindowTitle = generateGroceryListButtonLabel
 
 addRecipesTab = "Recipes"
 assignRecipesTab = "Meal Plan"
@@ -126,7 +130,7 @@ def configureGui(app, handleOptionBox, press):
     app.setEntryDefault(newDateEntryLabel, "yyyy-mm-dd")
     app.addButton("Go", press, row = dateRow, column = goButtonColumn)
     
-    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", addRecipesTab)
+    app.setTabbedFrameSelectedTab("recipeSubtabbedFrame", assignRecipesTab)
     
 def displayProjectedGroceryBill(app, projection):
     formattedProjection = "${:.2f}".format(projection)
