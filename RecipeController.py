@@ -197,7 +197,7 @@ def press(btn):
         pressPriceAutoFill()
     elif btn == recipeGoAgainButton:
         pressRecipeGo()
-    elif btn.__contains__(" Recipe: "):
+    elif btn.__contains__(windowTitleSuffix):
         if btn.endswith(updateButtonSuffix) or btn.endswith(submitButtonSuffix):
             pressRecipeSubmit()
         elif btn.endswith(cancelButtonSuffix):
@@ -502,7 +502,7 @@ def pressRecipeGo(returnName = False):
     else:
         windowTitlePrefix = "Update"
     
-    windowTitle = "{} Recipe:".format(windowTitlePrefix, recipeName)
+    windowTitle = "{}{}".format(windowTitlePrefix, windowTitleSuffix)
     windowTitleUnique = windowTitle + uniqueLabel
 
     app.startSubWindow(name=windowTitleUnique, title=windowTitle, modal=True)
@@ -662,10 +662,11 @@ def pressRecipeAssign():
         
         app.infoBox("Success", "Successfully updated recipe assignments.")
         
-    except:
+    except Exception as e:
         app.errorBox("ERROR", "Error occurred during recipe assignment. See console log for details.")
+        print(str(e))
 
-    if projectBill == True:
+    if projectBill == True: ## projectBill is global var declared at top of file
         print("********************************************")
         projectedBill = getProjectedGroceryBill(getDateEntry())
         print(projectedBill)
@@ -691,7 +692,7 @@ def checkEntriesForCalendar(day, weekOfDate, mainDishInput, sideAInput, sideBInp
             summary = summary.replace(phrase, "")
             
     if assignmentHasChanged:
-        if app.getCheckBox("Update"):
+        if app.getCheckBox(updateCheckBoxLabel):
             addToCalendar(day, weekOfDate, summary)
         else:
             print("Calendar will not be changed because update checkbox is not ticked in settings")

@@ -49,6 +49,7 @@ priceAutoFillButton = "Auto Fill"
 recipeNameEntryTitle = "recipeNameEntryTitle"
 multiplierEntry = "  x"
 defaultMultiplier = "1"
+windowTitleSuffix = " Recipe:"
 
 shoppingListWindowTitle = generateGroceryListButtonLabel
 
