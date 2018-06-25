@@ -106,7 +106,7 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
     print("\n")
     
 def checkIfMealNeedsExtraReminder(mealName):
-    extraReminderRecipeList = ["Pulled pork"]
+    extraReminderRecipeList = ["Pulled pork", "Salsa chicken", "Beef roast"]
     
     for recipe in extraReminderRecipeList:
         if mealName.__contains__(recipe):
