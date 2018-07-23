@@ -10,7 +10,6 @@ from Ingredient import Ingredient
 from Store import Store
 from ast import literal_eval
 
-daysOfWeek = listOptions(DayAssignment.dayNameColumn, DayAssignment.dayTable, True, "ORDER BY {} ASC".format(DayAssignment.dayIdColumn))
 newRecipeLabel = "Recipe Name "
 recipeTypeLabel = "Recipe Type "
 recipeCookbookTypeLabel = "Cookbook Type "
