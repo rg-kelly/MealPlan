@@ -5,7 +5,6 @@ from DayAssignment import DayAssignment
 from Utilities import *
 import Calendar
 from datetime import datetime
-from datetime import timedelta
 from WeekOfDate import WeekOfDate
 from Settings import Settings
 from Purchase_History import Purchase_History
@@ -21,8 +20,6 @@ Q_ = ureg.Quantity
 app = gui("Meal Plan Configuration")
 app.setLogLevel("ERROR")
 
-dateFormat = "%Y-%m-%d"
-timeFormat = "%I:%M"
 newOption = "- Select or Add New -"
 ingredientsList = []
 submitButtonSuffix = "__submitButton"
@@ -76,15 +73,15 @@ def handleOptionBox(labelName, actionType, nameColumn, tableName, row = defaultR
 
 def validateDateEntry(dateInput):
     try:
-        datetime.strptime(dateInput, dateFormat)
+        datetime.strptime(dateInput, WeekOfDate.dateFormat)
         return True
     except ValueError:
         return False
 
 def validateTimeEntries(startTime, endTime):
     try:
-        startTime = datetime.strptime(startTime, timeFormat)
-        endTime = datetime.strptime(endTime, timeFormat)
+        startTime = datetime.strptime(startTime, WeekOfDate.timeFormat)
+        endTime = datetime.strptime(endTime, WeekOfDate.timeFormat)
         
         if startTime > endTime:
             errorMessage = "Start time must be less than the end time."
@@ -97,7 +94,7 @@ def validateTimeEntries(startTime, endTime):
         raise Exception(errorMessage)
 
 def getDateEntry(notifyIfManual = False):
-    dateEntry, isManual = getEntryLogic(dateEntryLabel, newDateEntryLabel, datetime.strftime(WeekOfDate.findClosestWeekOfDate(listOptions=False), dateFormat), validateDateEntry, "Ensure it is formatted like YYYY-MM-DD and is a legitimate calendar date.", True)
+    dateEntry, isManual = getEntryLogic(dateEntryLabel, newDateEntryLabel, datetime.strftime(WeekOfDate.findClosestWeekOfDate(listOptions=False), WeekOfDate.dateFormat), validateDateEntry, "Ensure it is formatted like YYYY-MM-DD and is a legitimate calendar date.", True)
     
     if notifyIfManual:
         return dateEntry, isManual
@@ -568,7 +565,7 @@ def pressDateGo():
         wkOfDate.add()
         handleOptionBox(weekOfDatePurchaseSelectionLabel, "update", WeekOfDate.dateNameColumn, WeekOfDate.dateTable, row = headingRow + 2, column = pricesColumnStart + 2)
         
-        for day in daysOfWeek:
+        for day in DayAssignment.daysOfWeek:
             dayObj = DayAssignment.createNewDay(day, dateEntry)
             dayObj.add()
 
@@ -620,7 +617,7 @@ def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideAT
     column = defaultColumn
     noneColumn = column + 3
     
-    for day in daysOfWeek:            
+    for day in DayAssignment.daysOfWeek:            
         handleOptionBox(day, actionType, Recipe.recipeNameColumn, mainTableParameter, row, column)
         handleOptionBox(Recipe.sideALabelPrefix + day, actionType, Recipe.recipeNameColumn, sideATableParameter, row, column + 1)
         handleOptionBox(Recipe.sideBLabelPrefix + day, actionType, Recipe.recipeNameColumn, sideBTableParameter, row, column + 2)
@@ -653,7 +650,7 @@ def pressGenerateGroceryList():
 
 def pressRecipeAssign():
     try:
-        for day in daysOfWeek:
+        for day in DayAssignment.daysOfWeek:
             mainDishInput = app.getOptionBox(day)
             sideAInput = app.getOptionBox(Recipe.sideALabelPrefix + day)
             sideBInput = app.getOptionBox(Recipe.sideBLabelPrefix + day)
@@ -699,7 +696,7 @@ def checkEntriesForCalendar(day, weekOfDate, mainDishInput, sideAInput, sideBInp
     
 def addToCalendar(day, dateEntry, summary):
     dateDict = {}        
-    dateDict[day] = datetime.strftime(datetime.strptime(dateEntry, dateFormat) + timedelta(days=daysOfWeek.index(day)), dateFormat) 
+    dateDict[day] = DayAssignment.translateWeekOfDate(day, dateEntry)
     Calendar.main(summary, dateDict[day], app.getEntry(startLabelDinner), app.getEntry(endLabelDinner))
 
 configureGui(app, handleOptionBox, press)
