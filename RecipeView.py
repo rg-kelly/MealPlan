@@ -16,6 +16,7 @@ recipeCookbookTypeLabel = "Cookbook Type "
 dateEntryLabel = "Week Of: "
 newDateEntryLabel = "Add: "
 noneButtonLabel = "None"
+eventLabelTitle = "calendarEvent"
 generateGroceryListButtonLabel = "Generate Grocery List"
 generateListSymbol = ">>>" ## TODO: Replace with something more intuitive
 newIngredientLabel = "Ingredient Name "
