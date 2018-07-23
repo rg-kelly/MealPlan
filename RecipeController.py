@@ -559,6 +559,7 @@ def pressDateGo():
         app.addLabel("mainTitle", "Main", row = typeHeadingRow, column = 0)
         app.addLabel("side1Title", "Side 1", row = typeHeadingRow, column = 1)
         app.addLabel("side2Title", "Side 2", row = typeHeadingRow, column = 2)
+        app.addLabel("eventColumnTitle", "Calendar Events", row = typeHeadingRow, column = 4)
         
     if isNewDate:
         wkOfDate = WeekOfDate(dateEntry)
@@ -612,10 +613,19 @@ def getActionType(tabType = assignRecipesTab):
     
     return actionType
 
+def addCalendarEventText(eventLabelTitleWithDay, day, row, column):
+    currentDate = DayAssignment.translateWeekOfDate(day, getDateEntry())
+    eventName = Calendar.getDinnerEvents(currentDate, checkNonMealCalendars=True, returnEventObject=False)
+    if not eventName: eventName = "--"
+    
+    app.addLabel(eventLabelTitleWithDay, eventName, row = row, column = column)
+    app.setLabelBg(eventLabelTitleWithDay, "darkseagreen")
+
 def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideATableParameter = Recipe.whereSideTypeId, sideBTableParameter = Recipe.whereSideTypeId, actionType = "update"):    
     row = typeHeadingRow + 1
     column = defaultColumn
     noneColumn = column + 3
+    eventsColumn = noneColumn + 1
     
     for day in DayAssignment.daysOfWeek:            
         handleOptionBox(day, actionType, Recipe.recipeNameColumn, mainTableParameter, row, column)
@@ -624,6 +634,7 @@ def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideAT
         
         if actionType == "add":
             app.addNamedButton(noneButtonLabel, noneButtonLabel + "_" + day, press, row = row, column = noneColumn)
+            addCalendarEventText(eventLabelTitle + "_" + day, day, row = row, column = eventsColumn)
         
         row += 1
 
