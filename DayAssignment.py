@@ -1,6 +1,6 @@
 from DataConnection import DataConnection
 from RecipeModel import Recipe
-from datetime import datetime
+from datetime import datetime, timedelta
 from WeekOfDate import WeekOfDate
 from Ingredient import Ingredient
 from Amount_Units import Amount_Units
@@ -211,6 +211,11 @@ class DayAssignment:
 
         print("Successfully added day for {}:{}".format(self.weekOfDate, self.dayName))
         print(self)
+        
+            
+    def translateWeekOfDate(dayOfWeek, weekOfDate):
+        date = datetime.strftime(datetime.strptime(weekOfDate, WeekOfDate.dateFormat) + timedelta(days=DayAssignment.daysOfWeek.index(dayOfWeek)), WeekOfDate.dateFormat)     
+        return date
     
     def __str__(self):        
         message = "--- Summary ---\n"
