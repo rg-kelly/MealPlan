@@ -7,6 +7,9 @@ class WeekOfDate:
     
     dateIdColumn = "Date_ID"
     dateNameColumn = "Date"
+    
+    dateFormat = "%Y-%m-%d"
+    timeFormat = "%I:%M"    
 
     def __init__(self, weekOfDate):
         self.weekOfDate = weekOfDate
@@ -60,7 +63,7 @@ class WeekOfDate:
                                 listOfDates.append(datetime.strftime(item[0], "%Y-%m-%d"))
                     break
         
-        if listOptions: return listOfDates
+        if listOptions: return listOfDates        
         
     def __str__(self):
         message = "Week of date: " + self.weekOfDate
