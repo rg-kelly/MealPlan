@@ -22,6 +22,10 @@ CLIENT_SECRET_FILE = 'client_secret_calendar.json'
 APPLICATION_NAME = 'Google Calendar API Python Quickstart'
 dateFormat = "%Y-%m-%d"
 
+mealCalendarId = 'qn8ga252asppaafdm1doffesh0@group.calendar.google.com'
+familyCalendarId = 'family09160014585628777217@group.calendar.google.com'
+rachelCalendarId = 'vq9lae4ug7r5s4o2tomc46jih0@group.calendar.google.com'
+seanCalendarId = 'q4qejnvvltkce3p4lp60eqnqko@group.calendar.google.com'
 
 def get_credentials():
     """Gets valid user credentials from storage.
@@ -56,13 +60,7 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('calendar', 'v3', http=http, developerKey='complete-road-172122')
     
-    mealCalendarId = 'qn8ga252asppaafdm1doffesh0@group.calendar.google.com'
-    minDate = '{}T00:00:00Z'.format(date)
-    maxDate = '{}T00:00:00Z'.format(datetime.datetime.strftime(datetime.datetime.strptime(date, dateFormat) + datetime.timedelta(days=1), dateFormat))
-    eventsResult = service.events().list(
-        calendarId=mealCalendarId, timeMin=minDate, timeMax=maxDate, maxResults=1, singleEvents=True,
-        orderBy='startTime').execute()    
-    events = eventsResult.get('items', [])    
+    currentSummary, events, event = getDinnerEvents(date, checkNonMealCalendars=False, returnEventObject=True)
     newSummaryIsNone = (summaryParam == "")
     defaultExtraReminder = {'useDefault': False, 'overrides': [{'minutes': 540, 'method': 'popup'}, {'minutes': 30, 'method': 'popup'}]}
 
@@ -72,9 +70,6 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
             print("====== Deleting existing event {} ======".format(summaryParam))
             service.events().delete(calendarId=mealCalendarId, eventId=events[0].get('id', None)).execute()
         else:
-            event = service.events().get(calendarId=mealCalendarId, eventId=events[0].get('id', None)).execute()
-            currentSummary = event.get('summary', None)
-            
             if currentSummary != None and currentSummary != summaryParam:            
                 print("====== Updating existing event to {} ======".format(summaryParam))
                 event['summary'] = summaryParam
@@ -114,5 +109,51 @@ def checkIfMealNeedsExtraReminder(mealName):
         else:
             return False
 
-if __name__ == '__main__':
-    main()
+def getDinnerEvents(currentDate, checkNonMealCalendars = False, returnEventObject = True):
+    """ Retrieve events from Google calendars. From personal/social calendar(s), currently just want the summary data
+    but from the meal calendar we may also need to have the event object available for updating/deleting.
+    """
+    credentials = get_credentials()
+    http = credentials.authorize(httplib2.Http())
+    service = discovery.build('calendar', 'v3', http=http, developerKey='complete-road-172122')
+    
+    minDate = '{}T00:00:00Z'.format(currentDate)
+    maxDate = '{}T00:00:00Z'.format(datetime.datetime.strftime(datetime.datetime.strptime(currentDate, dateFormat) + datetime.timedelta(days=1), dateFormat))
+    # TODO: Need to adjust timing for Family calendar because it is in UTC tz which is 5 hours ahead of CST..
+    returnList = False
+    
+    if checkNonMealCalendars == False:
+        calendarList = [mealCalendarId]
+    else:
+        calendarList = [familyCalendarId, seanCalendarId, rachelCalendarId]
+        summaryList = []
+    numberOfCalendars = len(calendarList)
+    
+    for calendar in calendarList:        
+        eventsResult = service.events().list(
+            calendarId=calendar, timeMin=minDate, timeMax=maxDate, maxResults=1, singleEvents=True,
+            orderBy='startTime').execute()
+        events = eventsResult.get('items', [])
+        
+        if events:
+            event = service.events().get(calendarId=calendar, eventId=events[0].get('id', None)).execute()
+            eventSummary = event.get('summary', None)
+            
+            if numberOfCalendars > 1:
+                summaryList.append(eventSummary)
+                returnList = True
+        else:
+            event = None
+            eventSummary = None
+            
+    if returnEventObject:
+        return eventSummary, events, event
+    elif returnList:
+        return " / ".join(summaryList)
+    else:
+        return eventSummary
+    
+#if __name__ == '__main__':
+    #main()
+#summary = getDinnerEvents('2018-07-15', checkNonMealCalendars=True, returnEventObject=False)
+#print(summary)
