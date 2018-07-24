@@ -65,7 +65,6 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
     defaultExtraReminder = {'useDefault': False, 'overrides': [{'minutes': 540, 'method': 'popup'}, {'minutes': 30, 'method': 'popup'}]}
 
     if events:
-        print(events)
         if newSummaryIsNone:
             print("====== Deleting existing event {} ======".format(summaryParam))
             service.events().delete(calendarId=mealCalendarId, eventId=events[0].get('id', None)).execute()
@@ -116,12 +115,14 @@ def getDinnerEvents(currentDate, checkNonMealCalendars = False, returnEventObjec
     credentials = get_credentials()
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('calendar', 'v3', http=http, developerKey='complete-road-172122')
-    
+
     minDate = '{}T00:00:00Z'.format(currentDate)
     maxDate = '{}T00:00:00Z'.format(datetime.datetime.strftime(datetime.datetime.strptime(currentDate, dateFormat) + datetime.timedelta(days=1), dateFormat))
-    # TODO: Need to adjust timing for Family calendar because it is in UTC tz which is 5 hours ahead of CST..
+    utcMinDate = '{}T05:00:00Z'.format(currentDate)
+    utcMaxDate = '{}T05:00:00Z'.format(datetime.datetime.strftime(datetime.datetime.strptime(currentDate, dateFormat) + datetime.timedelta(days=1), dateFormat))
+
     returnList = False
-    
+
     if checkNonMealCalendars == False:
         calendarList = [mealCalendarId]
     else:
@@ -129,23 +130,27 @@ def getDinnerEvents(currentDate, checkNonMealCalendars = False, returnEventObjec
         summaryList = []
     numberOfCalendars = len(calendarList)
     
-    for calendar in calendarList:        
+    for calendar in calendarList:
+        if calendar == familyCalendarId:
+            minDate = utcMinDate
+            maxDate = utcMaxDate
+            
         eventsResult = service.events().list(
-            calendarId=calendar, timeMin=minDate, timeMax=maxDate, maxResults=1, singleEvents=True,
+            calendarId=calendar, timeMin=minDate, timeMax=maxDate, maxResults=20, singleEvents=True,
             orderBy='startTime').execute()
         events = eventsResult.get('items', [])
         
-        if events:
-            event = service.events().get(calendarId=calendar, eventId=events[0].get('id', None)).execute()
-            eventSummary = event.get('summary', None)
-            
-            if numberOfCalendars > 1:
-                summaryList.append(eventSummary)
-                returnList = True
-        else:
+        if not events:
             event = None
             eventSummary = None
-            
+        else:
+            for event in events:
+                eventSummary = event.get('summary', None)
+                
+                if numberOfCalendars > 1:
+                    summaryList.append(eventSummary)
+                    returnList = True
+
     if returnEventObject:
         return eventSummary, events, event
     elif returnList:
