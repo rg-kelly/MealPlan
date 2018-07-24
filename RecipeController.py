@@ -615,7 +615,7 @@ def getActionType(tabType = assignRecipesTab):
 
 def addCalendarEventText(eventLabelTitleWithDay, day, row, column):
     currentDate = DayAssignment.translateWeekOfDate(day, getDateEntry())
-    eventName = Calendar.getDinnerEvents(currentDate, checkNonMealCalendars=True, returnEventObject=False)
+    eventName = Calendar.getCalendarEvents(currentDate, checkNonMealCalendars=True, returnEventObject=False)
     if not eventName: eventName = "--"
     
     app.addLabel(eventLabelTitleWithDay, eventName, row = row, column = column)

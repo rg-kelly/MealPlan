@@ -60,7 +60,7 @@ def main(summaryParam = "", date = datetime.datetime.strftime(datetime.datetime.
     http = credentials.authorize(httplib2.Http())
     service = discovery.build('calendar', 'v3', http=http, developerKey='complete-road-172122')
     
-    currentSummary, events, event = getDinnerEvents(date, checkNonMealCalendars=False, returnEventObject=True)
+    currentSummary, events, event = getCalendarEvents(date, checkNonMealCalendars=False, returnEventObject=True)
     newSummaryIsNone = (summaryParam == "")
     defaultExtraReminder = {'useDefault': False, 'overrides': [{'minutes': 540, 'method': 'popup'}, {'minutes': 30, 'method': 'popup'}]}
 
@@ -108,7 +108,7 @@ def checkIfMealNeedsExtraReminder(mealName):
         else:
             return False
 
-def getDinnerEvents(currentDate, checkNonMealCalendars = False, returnEventObject = True):
+def getCalendarEvents(currentDate, checkNonMealCalendars = False, returnEventObject = True):
     """ Retrieve events from Google calendars. From personal/social calendar(s), currently just want the summary data
     but from the meal calendar we may also need to have the event object available for updating/deleting.
     """
@@ -160,5 +160,5 @@ def getDinnerEvents(currentDate, checkNonMealCalendars = False, returnEventObjec
     
 #if __name__ == '__main__':
     #main()
-#summary = getDinnerEvents('2018-07-15', checkNonMealCalendars=True, returnEventObject=False)
+#summary = getCalendarEvents('2018-07-25', checkNonMealCalendars=False, returnEventObject=True)[0]
 #print(summary)
