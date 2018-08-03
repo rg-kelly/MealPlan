@@ -1,10 +1,10 @@
 """
 TO DO:
-*- On date go, add info for calendar events that would affect meals
-- Generate shopping list button on meal plan tab. That would display all ingredients needed (and prices?). Could edit prices/amounts and then generate budget prediction. Export to keep.
+**- Bug: Update calendar list when switch to another week of date
+*- Generate shopping list button on meal plan tab. That would display all ingredients needed (and prices?). Could edit prices/amounts and then generate budget prediction. Export to keep.
+- Automatically generate meal plan (check calendar for night time events over dinner hour and go off baseline meal plan like as in sheets etc)
 - Store extra reminder (True/False and length) info in db instead of hard code in calendar.py
 - Verify that calculations are accurate for report (esp. min/max values)
-- Automatically generate meal plan (check calendar for night time events over dinner hour and go off baseline meal plan like as in sheets etc)
 - Go through code and replace constants/repeated strings with variables
   #####
 - Add 'add to inventory' check box for enter prices screen, then don't have to enter

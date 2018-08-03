@@ -227,4 +227,4 @@ class DayAssignment:
 
         return message
     
-DayAssignment.getIngredientsList('2017-10-02')
+#print(DayAssignment.getIngredientsList('2018-07-23'))

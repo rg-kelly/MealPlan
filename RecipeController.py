@@ -184,6 +184,8 @@ def press(btn):
         pressRecipeAssign()
     elif btn == "Go":
         pressDateGo()
+    elif btn == autoMealPlanButtonLabel:
+        pressAutoMealPlan()
     elif btn == "Update":
         pressSettingsUpdate()
     elif btn.startswith("None"):
@@ -550,6 +552,20 @@ def pressRecipeGo(returnName = False):
     app.stopSubWindow()
     app.showSubWindow(windowTitleUnique)
 
+def pressAutoMealPlan():
+    mealPlanDict = { "Monday": { "Main": "Jalapeno bacon chicken strips", "Side 1": "Broccoli" },
+                     "Tuesday": { "Main": "Tacos", "Side 1": "Chips and salsa" },
+                     "Wednesday": { "Main": ["Steak", "Beef roast"], "Side 1": "Corn" },
+                     "Thursday": { "Main": "Pork loin", "Side 1": "Peas" },
+                     "Friday": { "Main": "Blackened tilapia", "Side 1": "Sweet potato fries" },
+                     "Saturday": { "Main": "Chicken stir fry", "Side 1": "Rice" },
+                     "Sunday": { "Main": "Eggs", "Side 1": ["Bacon", "Breakfast sausage"], "Side 2": "Toast and jelly" },
+    }
+    
+    for day in mealPlanDict:
+        pass
+    # get items from dictionary and set option boxes
+
 def pressDateGo():
     dateEntry, isManualDateEntry = getDateEntry(notifyIfManual=True)
     isNewDate = (Utilities.getKnownInfo(dateEntry, WeekOfDate.dateIdColumn, WeekOfDate.dateNameColumn, WeekOfDate.dateTable, False) == None)
@@ -560,6 +576,7 @@ def pressDateGo():
         app.addLabel("side1Title", "Side 1", row = typeHeadingRow, column = 1)
         app.addLabel("side2Title", "Side 2", row = typeHeadingRow, column = 2)
         app.addLabel("eventColumnTitle", "Calendar Events", row = typeHeadingRow, column = 4)
+        app.addButton(autoMealPlanButtonLabel, pressAutoMealPlan, row = dateRow, column = goButtonColumn + 1)
         
     if isNewDate:
         wkOfDate = WeekOfDate(dateEntry)
@@ -648,8 +665,15 @@ def pressGenerateGroceryList():
     weekOfDate = getDateEntry()
     shoppingListWindowName = shoppingListWindowTitle + "_" + weekOfDate
     
-    app.startSubWindow(name = shoppingListWindowName, title = shoppingListWindowTitle, modal = True)
+    app.startSubWindow(name = shoppingListWindowName, title = shoppingListWindowTitle, modal = True) # Needs to be able to scroll
+    ingredientsList = DayAssignment.getIngredientsList(weekOfDate)
     
+    count = 0
+    for item in ingredientsList:
+        app.addLabel(str(item) + str(count), item)
+        count += 1
+    
+    # bug: need to handle closing window and re-opening..
     # display all ingredients needed, price per unit, amount needed.
         # Issue - uniqueness in labels (i.e. ingred name)... should just have all entries? But not care if user tries to change ingredient name or other static info?
     # Be able to edit prices/amounts and then generate budget prediction (Can set to zero if don't need any)

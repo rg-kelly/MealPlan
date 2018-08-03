@@ -17,7 +17,7 @@ dateEntryLabel = "Week Of: "
 newDateEntryLabel = "Add: "
 noneButtonLabel = "None"
 eventLabelTitle = "calendarEvent"
-generateGroceryListButtonLabel = "Generate Grocery List"
+generateGroceryListButtonLabel = "Grocery List"
 generateListSymbol = ">>>" ## TODO: Replace with something more intuitive
 newIngredientLabel = "Ingredient Name "
 startLabelDinner = "Start: "
@@ -50,6 +50,7 @@ recipeNameEntryTitle = "recipeNameEntryTitle"
 multiplierEntry = "  x"
 defaultMultiplier = "1"
 windowTitleSuffix = " Recipe:"
+autoMealPlanButtonLabel = "Auto Meal Plan"
 
 shoppingListWindowTitle = generateGroceryListButtonLabel
 
