@@ -22,6 +22,9 @@ class DayAssignment:
     noneRecipeName = "None"
     
     daysOfWeek = Utilities.listOptions(dayNameColumn, dayTable, True, "ORDER BY {} ASC".format(dayIdColumn))
+    mainDishLabel = "Main"
+    sideOneLabel = "Side 1"
+    sideTwoLabel = "Side 2"
 
     def __init__(self, dayName, weekOfDate, mainDish, sideA, sideB):
         self.dayName = dayName

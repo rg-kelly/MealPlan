@@ -553,28 +553,35 @@ def pressRecipeGo(returnName = False):
     app.showSubWindow(windowTitleUnique)
 
 def pressAutoMealPlan():
-    mealPlanDict = { "Monday": { "Main": "Jalapeno bacon chicken strips", "Side 1": "Broccoli" },
-                     "Tuesday": { "Main": "Tacos", "Side 1": "Chips and salsa" },
-                     "Wednesday": { "Main": ["Steak", "Beef roast"], "Side 1": "Corn" },
-                     "Thursday": { "Main": "Pork loin", "Side 1": "Peas" },
-                     "Friday": { "Main": "Blackened tilapia", "Side 1": "Sweet potato fries" },
-                     "Saturday": { "Main": "Chicken stir fry", "Side 1": "Rice" },
-                     "Sunday": { "Main": "Eggs", "Side 1": ["Bacon", "Breakfast sausage"], "Side 2": "Toast and jelly" },
-    }
+    mainKey = DayAssignment.mainDishLabel
+    sideOneKey = DayAssignment.sideOneLabel
+    sideTwoKey = DayAssignment.sideTwoLabel
+    
+    mealPlanDict = { "Monday": { mainKey: "Jalapeno bacon chicken strips", sideOneKey: "Broccoli" },
+                     "Tuesday": { mainKey: "Tacos", sideOneKey: "Chips and salsa" },
+                     "Wednesday": { mainKey: ["Steak", "Beef roast"], sideOneKey: "Corn" },
+                     "Thursday": { mainKey: "Pork loin", sideOneKey: "Peas" },
+                     "Friday": { mainKey: "Blackened tilapia", sideOneKey: "Sweet potato fries" },
+                     "Saturday": { mainKey: "Chicken stir fry", sideOneKey: "Rice" },
+                     "Sunday": { mainKey: "Eggs", sideOneKey: ["Bacon", "Breakfast sausage"], sideTwoKey: "Toast and jelly" }}
     
     for day in mealPlanDict:
-        pass
-    # get items from dictionary and set option boxes
-
+        mainDish = mealPlanDict[day].get(mainKey, None)
+        sideOne = mealPlanDict[day].get(sideOneKey, None)
+        sideTwo = mealPlanDict[day].get(sideTwoKey, None)
+        print("{}, {}, {}".format(mainDish, sideOne, sideTwo))
+    # logic for days with alternating main dishes
+    # set option boxes
+    
 def pressDateGo():
     dateEntry, isManualDateEntry = getDateEntry(notifyIfManual=True)
     isNewDate = (Utilities.getKnownInfo(dateEntry, WeekOfDate.dateIdColumn, WeekOfDate.dateNameColumn, WeekOfDate.dateTable, False) == None)
     actionType = getActionType()
     
     if actionType == "add":   
-        app.addLabel("mainTitle", "Main", row = typeHeadingRow, column = 0)
-        app.addLabel("side1Title", "Side 1", row = typeHeadingRow, column = 1)
-        app.addLabel("side2Title", "Side 2", row = typeHeadingRow, column = 2)
+        app.addLabel("mainTitle", DayAssignment.mainDishLabel, row = typeHeadingRow, column = 0)
+        app.addLabel("side1Title", DayAssignment.sideOneLabel, row = typeHeadingRow, column = 1)
+        app.addLabel("side2Title", DayAssignment.sideTwoLabel, row = typeHeadingRow, column = 2)
         app.addLabel("eventColumnTitle", "Calendar Events", row = typeHeadingRow, column = 4)
         app.addButton(autoMealPlanButtonLabel, pressAutoMealPlan, row = dateRow, column = goButtonColumn + 1)
         
