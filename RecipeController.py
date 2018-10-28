@@ -637,13 +637,16 @@ def getActionType(tabType = assignRecipesTab):
     
     return actionType
 
-def addCalendarEventText(eventLabelTitleWithDay, day, row, column):
+def addCalendarEventText(eventLabelTitleWithDay, day, row, column, actionType = "add"):
     currentDate = DayAssignment.translateWeekOfDate(day, getDateEntry())
     eventName = Calendar.getCalendarEvents(currentDate, checkNonMealCalendars=True, returnEventObject=False)
     if not eventName: eventName = "--"
-    
-    app.addLabel(eventLabelTitleWithDay, eventName, row = row, column = column)
-    app.setLabelBg(eventLabelTitleWithDay, "darkseagreen")
+
+    if actionType == "add":
+        app.addLabel(eventLabelTitleWithDay, eventName, row = row, column = column)
+        app.setLabelBg(eventLabelTitleWithDay, "darkseagreen")
+    elif actionType == "update":
+        app.setLabel(eventLabelTitleWithDay, eventName)
 
 def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideATableParameter = Recipe.whereSideTypeId, sideBTableParameter = Recipe.whereSideTypeId, actionType = "update"):    
     row = typeHeadingRow + 1
@@ -655,11 +658,13 @@ def configureRecipeDropDowns(mainTableParameter = Recipe.whereMainTypeId, sideAT
         handleOptionBox(day, actionType, Recipe.recipeNameColumn, mainTableParameter, row, column)
         handleOptionBox(Recipe.sideALabelPrefix + day, actionType, Recipe.recipeNameColumn, sideATableParameter, row, column + 1)
         handleOptionBox(Recipe.sideBLabelPrefix + day, actionType, Recipe.recipeNameColumn, sideBTableParameter, row, column + 2)
-        
+
+        eventLabelTitleWithDay = eventLabelTitle + "_" + day
         if actionType == "add":
             app.addNamedButton(noneButtonLabel, noneButtonLabel + "_" + day, press, row = row, column = noneColumn)
-            addCalendarEventText(eventLabelTitle + "_" + day, day, row = row, column = eventsColumn)
-        
+            addCalendarEventText(eventLabelTitleWithDay, day, row = row, column = eventsColumn)
+        elif actionType == "update":
+            addCalendarEventText(eventLabelTitleWithDay=eventLabelTitleWithDay, day=day, actionType="update", row=None, column=None)
         row += 1
 
     if actionType == "add":
